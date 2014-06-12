@@ -1,0 +1,7 @@
+*~
+.*.swp
+CMakeFiles
+CMakeCache.txt
+*.cmake
+Makefile
+Testing
