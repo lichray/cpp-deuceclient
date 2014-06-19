@@ -33,6 +33,11 @@
 #include <type_traits>
 #include <functional>
 
+#define constexpr
+#if defined(_MSC_VER)
+#define noexcept throw()
+#endif
+
 namespace stdex {
 
 namespace detail {
@@ -69,7 +74,7 @@ struct basic_string_view
 	using reverse_iterator = std::reverse_iterator<iterator>;
 	using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
-	static constexpr auto npos = size_type(-1);
+	static const auto npos = size_type(-1);
 
 	constexpr basic_string_view() noexcept
 		: it_(), sz_()
@@ -88,11 +93,6 @@ struct basic_string_view
 	constexpr basic_string_view(CharT const* str, size_type len)
 		: it_(str), sz_(len)
 	{}
-
-	constexpr basic_string_view(basic_string_view const&) noexcept
-		= default;
-	basic_string_view& operator=(basic_string_view const&) noexcept
-		= default;
 
 	constexpr iterator begin() const noexcept
 	{
@@ -382,7 +382,7 @@ private:
 template <typename CharT, typename Traits>
 inline
 void swap(basic_string_view<CharT, Traits>& a,
-    basic_string_view<CharT, Traits>& b) noexcept(noexcept(a.swap(b)))
+    basic_string_view<CharT, Traits>& b) noexcept
 {
 	a.swap(b);
 }
@@ -392,32 +392,9 @@ using wstring_view = basic_string_view<wchar_t>;
 using u16string_view = basic_string_view<char16_t>;
 using u32string_view = basic_string_view<char32_t>;
 
-inline namespace literals {
-inline namespace string_literals {
-
-constexpr string_view operator"" _sv(char const* str, std::size_t len)
-{
-	return string_view(str, len);
 }
 
-constexpr wstring_view operator"" _sv(wchar_t const* str, std::size_t len)
-{
-	return wstring_view(str, len);
-}
-
-constexpr u16string_view operator"" _sv(char16_t const* str, std::size_t len)
-{
-	return u16string_view(str, len);
-}
-
-constexpr u32string_view operator"" _sv(char32_t const* str, std::size_t len)
-{
-	return u32string_view(str, len);
-}
-
-}
-}
-
-}
+#undef noexcept
+#undef constexpr
 
 #endif
