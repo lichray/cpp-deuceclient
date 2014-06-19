@@ -32,6 +32,7 @@
 #include <iterator>
 #include <type_traits>
 #include <functional>
+#include <stdexcept>
 
 #define constexpr
 #if defined(_MSC_VER)
