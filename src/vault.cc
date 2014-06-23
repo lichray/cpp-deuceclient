@@ -14,45 +14,17 @@
  * limitations under the License.
  */
 
-#ifndef RAX_DEUCECLIENT_VAULT_H
-#define RAX_DEUCECLIENT_VAULT_H
-
-#include "__common.h"
-#include "clientfwd.h"
-#include "file.h"
+#include <deuceclient/client.h>
 
 namespace rax
 {
 namespace deuceclient
 {
 
-struct vault
+file vault::get_file(std::string fileid)
 {
-	explicit vault(std::string name, client& handle) :
-		client_(handle), vaultname_(std::move(name))
-	{}
-
-	file get_file(std::string fileid);
-
-	friend inline
-	bool operator==(vault const& a, vault const& b)
-	{
-		return &a.client_ == &b.client_ and
-		    a.vaultname_ == b.vaultname_;
-	}
-
-	friend inline
-	bool operator!=(vault const& a, vault const& b)
-	{
-		return !(a == b);
-	}
-
-private:
-	client& client_;
-	std::string vaultname_;
-};
+	return client_.get_file(vaultname_, std::move(fileid));
+}
 
 }
 }
-
-#endif

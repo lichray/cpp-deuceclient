@@ -33,6 +33,20 @@ struct file
 		fileid_(std::move(name))
 	{}
 
+	friend inline
+	bool operator==(file const& a, file const& b)
+	{
+		return &a.client_ == &b.client_ and
+		    a.vaultname_ == b.vaultname_ and
+		    a.fileid_ == b.fileid_;
+	}
+
+	friend inline
+	bool operator!=(file const& a, file const& b)
+	{
+		return !(a == b);
+	}
+
 private:
 	client& client_;
 	std::string vaultname_;
