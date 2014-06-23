@@ -8,9 +8,9 @@
 TEST_CASE("restclient and libcurl")
 {
 	RestClient::response r = RestClient::get(
-	  "http://http-test-server.heroku.com");
+	  "http://deuce.apiary-mock.com/v1.0/1");
 
-	CHECK(r.body == "GET");
+	CHECK(r.code == 200);
 }
 
 TEST_CASE("rapidjson")
