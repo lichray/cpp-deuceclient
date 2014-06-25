@@ -6,3 +6,4 @@ CMakeCache.txt
 Makefile
 Testing
 DartConfiguration.tcl
+deuce-prefix
