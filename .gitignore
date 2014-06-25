@@ -1,9 +1,15 @@
+# vim
 *~
 .*.swp
-CMakeFiles
-CMakeCache.txt
-*.cmake
+
+# cmake
+build/
 Makefile
-Testing
+/*.cmake
+CMakeCache.txt
+CMakeFiles/
+
+# ctest
+deuce-prefix/
+Testing/
 DartConfiguration.tcl
-deuce-prefix
