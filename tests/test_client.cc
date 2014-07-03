@@ -1,8 +1,9 @@
 #define CATCH_CONFIG_MAIN
-#include <catch/catch.hpp>
-#include <type_traits>
+#include "catch.hpp"
 
 #include <deuceclient/client.h>
+
+#include <type_traits>
 
 using namespace rax;
 
