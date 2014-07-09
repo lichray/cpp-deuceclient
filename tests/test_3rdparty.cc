@@ -2,15 +2,14 @@
 #include "catch.hpp"
 
 #include <rapidjson/document.h>
-#include <restclient/restclient.h>
+#include <httpverbs/httpverbs.h>
 #include <stdex/string_view.h>
 
-TEST_CASE("restclient and libcurl")
+TEST_CASE("httpverbs and libcurl")
 {
-	RestClient::response r = RestClient::get(
-	  "http://deuce.apiary-mock.com/v1.0/1");
+	auto r = httpverbs::get("http://deuce.apiary-mock.com/v1.0/1");
 
-	CHECK(r.code == 200);
+	CHECK(r.status_code == 200);
 }
 
 TEST_CASE("rapidjson")
