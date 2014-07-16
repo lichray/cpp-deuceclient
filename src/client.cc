@@ -14,12 +14,50 @@
  * limitations under the License.
  */
 
+#include <httpverbs/httpverbs.h>
+
 #include <deuceclient/client.h>
+#include <deuceclient/exceptions.h>
 
 namespace rax
 {
 namespace deuceclient
 {
+
+vault client::create_vault(stdex::string_view name)
+{
+	auto hdrs = common_hdrs_;
+	hdrs.add("Content-Type: application/json");
+
+	auto resp = httpverbs::put(prefix_ + name, std::move(hdrs));
+
+	expecting_server_response(201, resp);
+
+	return get_vault(name.to_string());
+}
+
+vault client::get_vault(stdex::string_view name)
+{
+	auto resp = httpverbs::get(prefix_ + name, common_hdrs_);
+
+	if (resp.status_code == 404)
+		throw not_found();
+
+	// XXX must be 200
+	expecting_server_response(204, resp);
+
+	return vault(name.to_string(), *this);
+}
+
+void client::delete_vault(stdex::string_view name)
+{
+	auto resp = httpverbs::delete_(prefix_ + name, common_hdrs_);
+
+	if (resp.status_code == 412)
+		throw cannot_delete();
+
+	expecting_server_response(204, resp);
+}
 
 }
 }

@@ -14,41 +14,52 @@
  * limitations under the License.
  */
 
-#ifndef RAX_DEUCECLIENT_CLIENT_H
-#define RAX_DEUCECLIENT_CLIENT_H
+#ifndef RAX_DEUCECLIENT_EXCEPTIONS_H
+#define RAX_DEUCECLIENT_EXCEPTIONS_H
 
-#include "vault.h"
-#include "file.h"
-
-#include <httpverbs/header_dict.h>
+#include <stdexcept>
 
 namespace rax
 {
 namespace deuceclient
 {
 
-struct client
+struct unexpected_server_response : std::runtime_error
 {
-	explicit client(std::string host) :
-		prefix_(std::move(host + "/v1.0/"))
-	{
-		// XXX should be get from identity service
-		common_hdrs_.add("X-Project-ID: sample_project_id");
-	}
+	explicit unexpected_server_response(int status_code);
 
-	vault create_vault(stdex::string_view name);
-	vault get_vault(stdex::string_view name);
-	void delete_vault(stdex::string_view name);
-
-	file get_file(std::string vaultname, std::string fileid)
+	int status_code() const
 	{
-		return file(std::move(vaultname), std::move(fileid), *this);
+		return status_code_;
 	}
 
 private:
-	std::string prefix_;
-	httpverbs::header_dict common_hdrs_;
+	int const status_code_;
 };
+
+struct error : std::runtime_error
+{
+	error(char const* msg) :
+		std::runtime_error(msg)
+	{}
+};
+
+struct not_found : error
+{
+	not_found();
+};
+
+struct cannot_delete : error
+{
+	cannot_delete();
+};
+
+template <typename RespType>
+inline void expecting_server_response(int status_code, RespType const& resp)
+{
+	if (resp.status_code != status_code)
+		throw unexpected_server_response(resp.status_code);
+}
 
 }
 }
