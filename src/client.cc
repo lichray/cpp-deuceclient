@@ -27,7 +27,7 @@ namespace deuceclient
 vault client::create_vault(stdex::string_view name)
 {
 	auto hdrs = common_hdrs_;
-	hdrs.add("Content-Type: application/json");
+	hdrs.add("Content-Type", "application/json");
 
 	auto resp = httpverbs::put(prefix_ + name, std::move(hdrs));
 
