@@ -7,7 +7,8 @@ using namespace rax;
 
 TEST_CASE("vault CRUD", "[deuce]")
 {
-	auto client = deuceclient::client("http://localhost:8080");
+	auto client = deuceclient::client("http://localhost:8080",
+	    "sample_project_id");
 
 	SECTION("create and read")
 	{

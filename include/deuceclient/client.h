@@ -29,26 +29,31 @@ namespace deuceclient
 
 struct client
 {
-	explicit client(std::string host) :
-		prefix_(std::move(host + "/v1.0/vaults/"))
-	{
-		// XXX should be get from identity service
-		common_hdrs_.add("X-Project-ID: sample_project_id");
-	}
+	explicit client(std::string host, std::string project_id);
+
+	file get_file(std::string vaultname, std::string fileid);
 
 	vault create_vault(stdex::string_view name);
 	vault get_vault(stdex::string_view name);
 	void delete_vault(stdex::string_view name);
 
-	file get_file(std::string vaultname, std::string fileid)
-	{
-		return file(std::move(vaultname), std::move(fileid), *this);
-	}
-
 private:
 	std::string prefix_;
 	httpverbs::header_dict common_hdrs_;
 };
+
+inline
+client::client(std::string host, std::string project_id) :
+	prefix_(std::move(host + "/v1.0/vaults/"))
+{
+	common_hdrs_.add("X-Project-ID: " + project_id);
+}
+
+inline
+file client::get_file(std::string vaultname, std::string fileid)
+{
+	return file(std::move(vaultname), std::move(fileid), *this);
+}
 
 }
 }
