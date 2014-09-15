@@ -7,10 +7,9 @@
 
 TEST_CASE("httpverbs and libcurl")
 {
-	auto r = httpverbs::get("http://deuce.apiary-mock.com/v1.0/1");
+	auto r = httpverbs::get("http://deuce.apiary-mock.com/v1.0/vaults/1");
 
-	// XXX must be 200
-	CHECK(r.status_code == 204);
+	CHECK(r.status_code == 200);
 }
 
 TEST_CASE("rapidjson")

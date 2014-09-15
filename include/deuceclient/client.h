@@ -30,7 +30,7 @@ namespace deuceclient
 struct client
 {
 	explicit client(std::string host) :
-		prefix_(std::move(host + "/v1.0/"))
+		prefix_(std::move(host + "/v1.0/vaults/"))
 	{
 		// XXX should be get from identity service
 		common_hdrs_.add("X-Project-ID: sample_project_id");

@@ -13,7 +13,7 @@ find_package(httpverbs REQUIRED)
 
 if(BUILD_TESTING)
 	find_package(Git REQUIRED)
-	find_package(PythonInterp REQUIRED)
+	find_package(PythonInterp 3.3 REQUIRED)
 endif()
 
 if(NOT MSVC)
@@ -27,6 +27,9 @@ include_directories(include)
 file(GLOB restclient_srcs 3rdparty/src/restclient/*.cpp)
 file(GLOB deuceclient_srcs src/*.cc)
 file(GLOB tests_srcs tests/*.cc)
+
+set(get_pip_py ${CMAKE_SOURCE_DIR}/files/get-pip.py)
+set(patch_config_py ${CMAKE_SOURCE_DIR}/files/patch-config.py)
 
 add_library(deuceclient STATIC ${deuceclient_srcs})
 target_link_libraries(deuceclient httpverbs)
@@ -43,9 +46,12 @@ if(BUILD_TESTING)
 	    deuce
 	    GIT_REPOSITORY https://github.com/rackerlabs/deuce.git
 	    TIMEOUT 5
-	    UPDATE_COMMAND ${GIT_EXECUTABLE} pull
-	    CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} -m virtualenv venv
-	    BUILD_COMMAND ""
+	    PATCH_COMMAND sh -c
+	        "git checkout . && patch -p0 < ${patch_config_py}"
+	    CONFIGURE_COMMAND sh -c
+	        "[ -e venv ] || ${PYTHON_EXECUTABLE} -m venv venv"
+	    BUILD_COMMAND sh -c
+	        ". venv/bin/activate$<SEMICOLON> python ${get_pip_py}"
 	    INSTALL_COMMAND sh -c
 	        ". venv/bin/activate$<SEMICOLON> pip install -e ../deuce")
 endif()

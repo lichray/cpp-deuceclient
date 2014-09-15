@@ -43,8 +43,7 @@ vault client::get_vault(stdex::string_view name)
 	if (resp.status_code == 404)
 		throw not_found();
 
-	// XXX must be 200
-	expecting_server_response(204, resp);
+	expecting_server_response(200, resp);
 
 	return vault(name.to_string(), *this);
 }
