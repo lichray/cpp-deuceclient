@@ -33,7 +33,7 @@ vault client::create_vault(stdex::string_view name)
 
 	expecting_server_response(201, resp);
 
-	return get_vault(name.to_string());
+	return vault(name.to_string(), *this);
 }
 
 vault client::get_vault(stdex::string_view name)
