@@ -10,6 +10,8 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY build)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY tests)
 
 find_package(httpverbs REQUIRED)
+find_package(Boost 1.48.0 REQUIRED)
+find_package(OpenSSL REQUIRED)
 
 if(BUILD_TESTING)
 	find_package(Git REQUIRED)
@@ -21,6 +23,8 @@ if(NOT MSVC)
 endif()
 
 include_directories(${httpverbs_INCLUDE_DIRS})
+include_directories(${Boost_INCLUDE_DIRS})
+include_directories(${OPENSSL_INCLUDE_DIR})
 include_directories(3rdparty/include)
 include_directories(include)
 
@@ -33,6 +37,7 @@ set(patch_config_py ${CMAKE_SOURCE_DIR}/files/patch-config.py)
 
 add_library(deuceclient STATIC ${deuceclient_srcs})
 target_link_libraries(deuceclient httpverbs)
+target_link_libraries(deuceclient ${OPENSSL_CRYPTO_LIBRARIES})
 
 if(BUILD_TESTING)
 	foreach(test_src ${tests_srcs})
