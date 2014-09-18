@@ -34,6 +34,11 @@ struct vault
 
 	file get_file(std::string fileid);
 
+	void upload_block(stdex::string_view sha1, stdex::string_view data);
+	void download_block(stdex::string_view sha1,
+	    std::function<size_t(char*, size_t)> f);
+	void delete_block(stdex::string_view sha1);
+
 	friend inline
 	bool operator==(vault const& a, vault const& b)
 	{

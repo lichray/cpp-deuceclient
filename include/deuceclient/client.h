@@ -37,7 +37,17 @@ struct client
 	vault get_vault(stdex::string_view name);
 	void delete_vault(stdex::string_view name);
 
+	void upload_block(stdex::string_view vaultname,
+	    stdex::string_view blockid, stdex::string_view data);
+	void download_block(stdex::string_view vaultname,
+	    stdex::string_view blockid, callback);
+	void delete_block(stdex::string_view vaultname,
+	    stdex::string_view blockid);
+
 private:
+	std::string url_for_block(stdex::string_view vaultname,
+	    stdex::string_view blockid);
+
 	std::string prefix_;
 	httpverbs::header_dict common_hdrs_;
 };

@@ -21,6 +21,21 @@ namespace rax
 namespace deuceclient
 {
 
+void vault::upload_block(stdex::string_view blockid, stdex::string_view data)
+{
+	client_.upload_block(vaultname_, blockid, data);
+}
+
+void vault::download_block(stdex::string_view blockid, callback f)
+{
+	client_.download_block(vaultname_, blockid, std::move(f));
+}
+
+void vault::delete_block(stdex::string_view blockid)
+{
+	client_.delete_block(vaultname_, blockid);
+}
+
 file vault::get_file(std::string fileid)
 {
 	return client_.get_file(vaultname_, std::move(fileid));

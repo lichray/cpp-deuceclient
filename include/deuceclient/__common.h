@@ -18,12 +18,15 @@
 #define RAX_DEUCECLIENT___COMMON_H
 
 #include <string>
+#include <functional>
 #include <stdex/string_view.h>
 
 namespace rax
 {
 namespace deuceclient
 {
+
+typedef std::function<size_t(char*, size_t)> callback;
 
 template <typename CharT, typename Traits, typename Alloc>
 std::basic_string<CharT, Traits, Alloc> operator+(
