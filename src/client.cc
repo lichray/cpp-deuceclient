@@ -19,35 +19,32 @@
 #include <deuceclient/client.h>
 #include <deuceclient/exceptions.h>
 
-using namespace httpverbs::keywords;
-
 namespace rax
 {
 namespace deuceclient
 {
 
-void client::upload_block(stdex::string_view vaultname,
-    stdex::string_view blockid, stdex::string_view data)
+void client::do_download(std::string url, callback f)
 {
-	auto hdrs = common_hdrs_;
-	hdrs.add("Content-Type", "application/octet-stream");
+	httpverbs::request req("GET", std::move(url));
+	req.headers = common_hdrs_;
 
-	auto resp = httpverbs::put(url_for_block(vaultname, blockid),
-	    std::move(hdrs), data_from(data));
+	auto resp = req.perform(std::move(f));
 
-	expecting_server_response(201, resp);
+	if (resp.status_code == 404)
+		throw not_found();
+
+	expecting_server_response(200, resp);
 }
 
-void client::download_block(stdex::string_view vaultname,
-    stdex::string_view blockid, callback f)
+void client::do_delete(std::string url)
 {
-	do_download(url_for_block(vaultname, blockid), std::move(f));
-}
+	auto resp = httpverbs::delete_(std::move(url), common_hdrs_);
 
-void client::delete_block(stdex::string_view vaultname,
-    stdex::string_view blockid)
-{
-	do_delete(url_for_block(vaultname, blockid));
+	if (resp.status_code == 412)
+		throw cannot_delete();
+
+	expecting_server_response(204, resp);
 }
 
 }

@@ -32,12 +32,14 @@ struct vault
 		client_(handle), vaultname_(std::move(name))
 	{}
 
-	file get_file(std::string fileid);
+	void upload_block(stdex::string_view blockid, stdex::string_view data);
+	void download_block(stdex::string_view blockid, callback);
+	void delete_block(stdex::string_view blockid);
 
-	void upload_block(stdex::string_view sha1, stdex::string_view data);
-	void download_block(stdex::string_view sha1,
-	    std::function<size_t(char*, size_t)> f);
-	void delete_block(stdex::string_view sha1);
+	file make_file();
+	file get_file(stdex::string_view fileid);
+	void download_file(stdex::string_view fileid, callback);
+	void delete_file(stdex::string_view fileid);
 
 	friend inline
 	bool operator==(vault const& a, vault const& b)

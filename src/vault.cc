@@ -36,9 +36,24 @@ void vault::delete_block(stdex::string_view blockid)
 	client_.delete_block(vaultname_, blockid);
 }
 
-file vault::get_file(std::string fileid)
+file vault::make_file()
 {
-	return client_.get_file(vaultname_, std::move(fileid));
+	return client_.make_file(vaultname_);
+}
+
+file vault::get_file(stdex::string_view fileid)
+{
+	return client_.get_file(vaultname_, fileid);
+}
+
+void vault::download_file(stdex::string_view fileid, callback f)
+{
+	client_.download_file(vaultname_, fileid, std::move(f));
+}
+
+void vault::delete_file(stdex::string_view fileid)
+{
+	client_.delete_file(vaultname_, fileid);
 }
 
 }

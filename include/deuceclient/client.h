@@ -31,8 +31,6 @@ struct client
 {
 	explicit client(std::string host, std::string project_id);
 
-	file get_file(std::string vaultname, std::string fileid);
-
 	vault create_vault(stdex::string_view name);
 	vault get_vault(stdex::string_view name);
 	void delete_vault(stdex::string_view name);
@@ -44,10 +42,22 @@ struct client
 	void delete_block(stdex::string_view vaultname,
 	    stdex::string_view blockid);
 
+	file make_file(stdex::string_view vaultname);
+	file get_file(stdex::string_view vaultname, stdex::string_view fileid);
+	void download_file(stdex::string_view vaultname,
+	    stdex::string_view fileid, callback);
+	void delete_file(stdex::string_view vaultname,
+	    stdex::string_view fileid);
+
 private:
 	std::string url_for_vault(stdex::string_view name);
 	std::string url_for_block(stdex::string_view vaultname,
 	    stdex::string_view blockid);
+	std::string url_for_file(stdex::string_view vaultname,
+	    stdex::string_view fileid);
+
+	void do_download(std::string url, callback);
+	void do_delete(std::string url);
 
 	std::string prefix_;
 	httpverbs::header_dict common_hdrs_;
@@ -61,9 +71,9 @@ client::client(std::string host, std::string project_id) :
 }
 
 inline
-file client::get_file(std::string vaultname, std::string fileid)
+file client::get_file(stdex::string_view vaultname, stdex::string_view fileid)
 {
-	return file(std::move(vaultname), std::move(fileid), *this);
+	return file(vaultname.to_string(), fileid.to_string(), *this);
 }
 
 inline
@@ -82,6 +92,17 @@ std::string client::url_for_block(stdex::string_view vaultname,
 	auto s = url_for_vault(vaultname);
 	s.append("/blocks/");
 	s.append(blockid.data(), blockid.size());
+
+	return s;
+}
+
+inline
+std::string client::url_for_file(stdex::string_view vaultname,
+    stdex::string_view fileid)
+{
+	auto s = url_for_vault(vaultname);
+	s.append("/files/");
+	s.append(fileid.data(), fileid.size());
 
 	return s;
 }

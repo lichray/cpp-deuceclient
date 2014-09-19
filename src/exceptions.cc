@@ -42,7 +42,7 @@ not_found::not_found() :
 {}
 
 cannot_delete::cannot_delete() :
-	error("vault not empty")
+	error("resource in use")
 {}
 
 }

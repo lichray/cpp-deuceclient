@@ -48,3 +48,18 @@ TEST_CASE("block CRUD", "[deuce]")
 		REQUIRE_NOTHROW(vault.delete_block(h));
 	}
 }
+
+TEST_CASE("file CRUD", "[deuce]")
+{
+	auto client = deuceclient::client("http://localhost:8080",
+	    "sample_project_id");
+	auto vault = client.create_vault("tsukubane");
+
+	{
+		auto f = vault.make_file();
+		auto f1 = vault.get_file(f.id());
+
+		REQUIRE(f1 == f);
+		REQUIRE_NOTHROW(vault.delete_file(f.id()));
+	}
+}

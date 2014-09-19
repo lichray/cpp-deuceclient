@@ -19,35 +19,39 @@
 #include <deuceclient/client.h>
 #include <deuceclient/exceptions.h>
 
-using namespace httpverbs::keywords;
-
 namespace rax
 {
 namespace deuceclient
 {
 
-void client::upload_block(stdex::string_view vaultname,
-    stdex::string_view blockid, stdex::string_view data)
+inline
+stdex::string_view last_component(stdex::string_view url)
 {
-	auto hdrs = common_hdrs_;
-	hdrs.add("Content-Type", "application/octet-stream");
+	auto it = std::find(url.rbegin(), url.rend(), '/');
+	return url.substr(url.rend() - it);
+}
 
-	auto resp = httpverbs::put(url_for_block(vaultname, blockid),
-	    std::move(hdrs), data_from(data));
+file client::make_file(stdex::string_view vaultname)
+{
+	auto resp = httpverbs::post(url_for_vault(vaultname) + "/files",
+	    common_hdrs_);
 
 	expecting_server_response(201, resp);
+
+	// issuing no HTTP request
+	return get_file(vaultname, last_component(resp.headers["location"]));
 }
 
-void client::download_block(stdex::string_view vaultname,
-    stdex::string_view blockid, callback f)
+void client::download_file(stdex::string_view vaultname,
+    stdex::string_view fileid, callback f)
 {
-	do_download(url_for_block(vaultname, blockid), std::move(f));
+	do_download(url_for_file(vaultname, fileid), std::move(f));
 }
 
-void client::delete_block(stdex::string_view vaultname,
-    stdex::string_view blockid)
+void client::delete_file(stdex::string_view vaultname,
+    stdex::string_view fileid)
 {
-	do_delete(url_for_block(vaultname, blockid));
+	do_delete(url_for_file(vaultname, fileid));
 }
 
 }

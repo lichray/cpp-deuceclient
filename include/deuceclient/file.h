@@ -30,8 +30,10 @@ struct file
 	explicit file(std::string name, std::string fileid, client& handle) :
 		client_(handle),
 		vaultname_(std::move(name)),
-		fileid_(std::move(name))
+		fileid_(std::move(fileid))
 	{}
+
+	stdex::string_view id() const;
 
 	friend inline
 	bool operator==(file const& a, file const& b)
@@ -52,6 +54,12 @@ private:
 	std::string vaultname_;
 	std::string fileid_;
 };
+
+inline
+stdex::string_view file::id() const
+{
+	return fileid_;
+}
 
 }
 }

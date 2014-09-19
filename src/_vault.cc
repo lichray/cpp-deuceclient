@@ -50,12 +50,7 @@ vault client::get_vault(stdex::string_view name)
 
 void client::delete_vault(stdex::string_view name)
 {
-	auto resp = httpverbs::delete_(url_for_vault(name), common_hdrs_);
-
-	if (resp.status_code == 412)
-		throw cannot_delete();
-
-	expecting_server_response(204, resp);
+	do_delete(url_for_vault(name));
 }
 
 }
