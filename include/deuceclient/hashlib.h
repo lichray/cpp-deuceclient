@@ -31,7 +31,7 @@ namespace detail
 struct sha1_provider
 {
 	typedef SHA_CTX context_type;
-	static const size_t digest_length = SHA_DIGEST_LENGTH;
+	static const size_t digest_size = SHA_DIGEST_LENGTH;
 
 	static
 	int init(context_type* ctx)
@@ -57,8 +57,9 @@ struct sha1_provider
 template <typename HashProvider>
 struct hasher
 {
-	typedef typename HashProvider::context_type context_type;
-	static const size_t digest_length = HashProvider::digest_length;
+	typedef typename HashProvider::context_type	context_type;
+	static const size_t digest_size = HashProvider::digest_size;
+	typedef std::array<unsigned char, digest_size>	digest_type;
 
 	hasher()
 	{
@@ -100,9 +101,9 @@ struct hasher
 		update(bytes.data(), bytes.size());
 	}
 
-	auto digest() -> std::array<unsigned char, digest_length>
+	auto digest() const -> digest_type
 	{
-		std::array<unsigned char, digest_length> md;
+		digest_type md;
 		auto tmp_ctx = ctx_;
 
 		HashProvider::final(md.data(), &tmp_ctx);
@@ -110,12 +111,12 @@ struct hasher
 		return md;
 	}
 
-	auto hexdigest() -> std::string
+	auto hexdigest() const -> std::string
 	{
 		auto md = digest();
 
 		std::string s;
-		s.resize(digest_length * 2);
+		s.resize(digest_size * 2);
 
 		auto it = begin(s);
 
@@ -141,6 +142,20 @@ private:
 
 	context_type ctx_;
 };
+
+template <typename HashProvider>
+inline
+bool operator==(hasher<HashProvider> const& a, hasher<HashProvider> const& b)
+{
+	return a.digest() == b.digest();
+}
+
+template <typename HashProvider>
+inline
+bool operator!=(hasher<HashProvider> const& a, hasher<HashProvider> const& b)
+{
+	return !(a == b);
+}
 
 typedef hasher<detail::sha1_provider> sha1;
 

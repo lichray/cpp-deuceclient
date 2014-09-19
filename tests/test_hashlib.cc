@@ -7,6 +7,11 @@
 TEST_CASE("SHA1")
 {
 #define SRC_LITERAL "natsu no ame"
+	SECTION("zero-length string")
+	{
+		REQUIRE(hashlib::sha1("") == hashlib::sha1());
+		REQUIRE(hashlib::sha1("") != hashlib::sha1("", 1));
+	}
 
 	SECTION("null-terminated")
 	{
