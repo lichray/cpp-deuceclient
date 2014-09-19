@@ -55,9 +55,9 @@ private:
 
 inline
 client::client(std::string host, std::string project_id) :
-	prefix_(std::move(host + "/v1.0/vaults/"))
+	prefix_(std::move(host) + "/v1.0/vaults/")
 {
-	common_hdrs_.add("X-Project-ID: " + project_id);
+	common_hdrs_.add("X-Project-ID: " + std::move(project_id));
 }
 
 inline
