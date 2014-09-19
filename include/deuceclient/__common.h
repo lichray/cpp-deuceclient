@@ -28,14 +28,6 @@ namespace deuceclient
 
 typedef std::function<size_t(char*, size_t)> callback;
 
-template <typename CharT, typename Traits, typename Alloc>
-std::basic_string<CharT, Traits, Alloc> operator+(
-    std::basic_string<CharT, Traits, Alloc> lhs,
-    stdex::basic_string_view<CharT, Traits> rhs)
-{
-	return std::move(lhs.append(rhs.data(), rhs.size()));
-}
-
 }
 }
 

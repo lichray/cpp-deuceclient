@@ -61,15 +61,5 @@ void client::delete_block(stdex::string_view vaultname,
 	expecting_server_response(204, resp);
 }
 
-std::string client::url_for_block(stdex::string_view vaultname,
-    stdex::string_view blockid)
-{
-	auto s = prefix_ + vaultname;
-	s.append("/blocks/");
-	s.append(blockid.data(), blockid.size());
-
-	return s;
-}
-
 }
 }

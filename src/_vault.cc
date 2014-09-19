@@ -29,7 +29,7 @@ vault client::create_vault(stdex::string_view name)
 	auto hdrs = common_hdrs_;
 	hdrs.add("Content-Type", "application/json");
 
-	auto resp = httpverbs::put(prefix_ + name, std::move(hdrs));
+	auto resp = httpverbs::put(url_for_vault(name), std::move(hdrs));
 
 	expecting_server_response(201, resp);
 
@@ -38,7 +38,7 @@ vault client::create_vault(stdex::string_view name)
 
 vault client::get_vault(stdex::string_view name)
 {
-	auto resp = httpverbs::get(prefix_ + name, common_hdrs_);
+	auto resp = httpverbs::get(url_for_vault(name), common_hdrs_);
 
 	if (resp.status_code == 404)
 		throw not_found();
@@ -50,7 +50,7 @@ vault client::get_vault(stdex::string_view name)
 
 void client::delete_vault(stdex::string_view name)
 {
-	auto resp = httpverbs::delete_(prefix_ + name, common_hdrs_);
+	auto resp = httpverbs::delete_(url_for_vault(name), common_hdrs_);
 
 	if (resp.status_code == 412)
 		throw cannot_delete();

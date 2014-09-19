@@ -45,6 +45,7 @@ struct client
 	    stdex::string_view blockid);
 
 private:
+	std::string url_for_vault(stdex::string_view name);
 	std::string url_for_block(stdex::string_view vaultname,
 	    stdex::string_view blockid);
 
@@ -63,6 +64,26 @@ inline
 file client::get_file(std::string vaultname, std::string fileid)
 {
 	return file(std::move(vaultname), std::move(fileid), *this);
+}
+
+inline
+std::string client::url_for_vault(stdex::string_view name)
+{
+	auto s = prefix_;
+	s.append(name.data(), name.size());
+
+	return s;
+}
+
+inline
+std::string client::url_for_block(stdex::string_view vaultname,
+    stdex::string_view blockid)
+{
+	auto s = url_for_vault(vaultname);
+	s.append("/blocks/");
+	s.append(blockid.data(), blockid.size());
+
+	return s;
 }
 
 }
