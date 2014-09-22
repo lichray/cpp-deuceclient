@@ -33,7 +33,6 @@ file(GLOB deuceclient_srcs src/*.cc)
 file(GLOB tests_srcs tests/*.cc)
 
 set(get_pip_py ${CMAKE_SOURCE_DIR}/files/get-pip.py)
-set(patch_config_py ${CMAKE_SOURCE_DIR}/files/patch-config.py)
 
 add_library(deuceclient STATIC ${deuceclient_srcs})
 target_link_libraries(deuceclient httpverbs)
@@ -51,8 +50,9 @@ if(BUILD_TESTING)
 	    deuce
 	    GIT_REPOSITORY https://github.com/rackerlabs/deuce.git
 	    TIMEOUT 5
+	    UPDATE_COMMAND git pull
 	    PATCH_COMMAND sh -c
-	        "git checkout . && patch -p0 < ${patch_config_py}"
+	        "git checkout ."
 	    CONFIGURE_COMMAND sh -c
 	        "[ -e venv ] || ${PYTHON_EXECUTABLE} -m venv venv"
 	    BUILD_COMMAND sh -c
