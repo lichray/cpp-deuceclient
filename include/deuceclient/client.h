@@ -42,7 +42,6 @@ struct client
 	void delete_block(stdex::string_view vaultname, sha1_digest blockid);
 
 	file make_file(stdex::string_view vaultname);
-	file get_file(stdex::string_view vaultname, stdex::string_view fileid);
 	void download_file(stdex::string_view vaultname,
 	    stdex::string_view fileid, callback);
 	void delete_file(stdex::string_view vaultname,
@@ -67,12 +66,6 @@ client::client(std::string host, std::string project_id) :
 	prefix_(std::move(host) + "/v1.0/vaults/")
 {
 	common_hdrs_.add("X-Project-ID: " + std::move(project_id));
-}
-
-inline
-file client::get_file(stdex::string_view vaultname, stdex::string_view fileid)
-{
-	return file(vaultname.to_string(), fileid.to_string(), *this);
 }
 
 inline

@@ -41,11 +41,6 @@ file vault::make_file()
 	return client_.make_file(vaultname_);
 }
 
-file vault::get_file(stdex::string_view fileid)
-{
-	return client_.get_file(vaultname_, fileid);
-}
-
 void vault::download_file(stdex::string_view fileid, callback f)
 {
 	client_.download_file(vaultname_, fileid, std::move(f));

@@ -42,9 +42,10 @@ struct vault
 	void delete_block(sha1_digest blockid);
 
 	file make_file();
-	file get_file(stdex::string_view fileid);
 	void download_file(stdex::string_view fileid, callback);
 	void delete_file(stdex::string_view fileid);
+
+	file get_file(stdex::string_view fileid);
 
 	friend inline
 	bool operator==(vault const& a, vault const& b)
@@ -63,6 +64,12 @@ private:
 	client& client_;
 	std::string vaultname_;
 };
+
+inline
+file vault::get_file(stdex::string_view fileid)
+{
+	return file(vaultname_, fileid.to_string(), client_);
+}
 
 }
 }

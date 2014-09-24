@@ -25,10 +25,9 @@ namespace deuceclient
 {
 
 inline
-stdex::string_view last_component(stdex::string_view url)
+std::string last_component(std::string const& url)
 {
-	auto it = std::find(url.rbegin(), url.rend(), '/');
-	return url.substr(url.rend() - it);
+	return url.substr(url.rfind('/') + 1);
 }
 
 file client::make_file(stdex::string_view vaultname)
@@ -38,8 +37,8 @@ file client::make_file(stdex::string_view vaultname)
 
 	expecting_server_response(201, resp);
 
-	// issuing no HTTP request
-	return get_file(vaultname, last_component(resp.headers["location"]));
+	return file(vaultname.to_string(),
+	    last_component(resp.headers["location"]), *this);
 }
 
 void client::download_file(stdex::string_view vaultname,
