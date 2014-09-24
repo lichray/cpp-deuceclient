@@ -19,6 +19,7 @@
 
 #include "clientfwd.h"
 #include "file.h"
+#include "hashlib.h"
 
 #include <functional>
 
@@ -28,6 +29,7 @@ namespace deuceclient
 {
 
 typedef std::function<size_t(char*, size_t)>	callback;
+typedef hashlib::sha1::digest_type		sha1_digest;
 
 struct vault
 {
@@ -35,9 +37,9 @@ struct vault
 		client_(handle), vaultname_(std::move(name))
 	{}
 
-	void upload_block(stdex::string_view blockid, stdex::string_view data);
-	void download_block(stdex::string_view blockid, callback);
-	void delete_block(stdex::string_view blockid);
+	void upload_block(sha1_digest blockid, stdex::string_view data);
+	void download_block(sha1_digest blockid, callback);
+	void delete_block(sha1_digest blockid);
 
 	file make_file();
 	file get_file(stdex::string_view fileid);

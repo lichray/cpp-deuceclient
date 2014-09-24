@@ -26,8 +26,8 @@ namespace rax
 namespace deuceclient
 {
 
-void client::upload_block(stdex::string_view vaultname,
-    stdex::string_view blockid, stdex::string_view data)
+void client::upload_block(stdex::string_view vaultname, sha1_digest blockid,
+    stdex::string_view data)
 {
 	auto hdrs = common_hdrs_;
 	hdrs.add("Content-Type", "application/octet-stream");
@@ -38,14 +38,13 @@ void client::upload_block(stdex::string_view vaultname,
 	expecting_server_response(201, resp);
 }
 
-void client::download_block(stdex::string_view vaultname,
-    stdex::string_view blockid, callback f)
+void client::download_block(stdex::string_view vaultname, sha1_digest blockid,
+    callback f)
 {
 	do_download(url_for_block(vaultname, blockid), std::move(f));
 }
 
-void client::delete_block(stdex::string_view vaultname,
-    stdex::string_view blockid)
+void client::delete_block(stdex::string_view vaultname, sha1_digest blockid)
 {
 	do_delete(url_for_block(vaultname, blockid));
 }

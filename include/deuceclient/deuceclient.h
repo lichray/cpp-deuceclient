@@ -19,6 +19,5 @@
 
 #include "client.h"
 #include "exceptions.h"
-#include "hashlib.h"
 
 #endif

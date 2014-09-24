@@ -35,12 +35,11 @@ struct client
 	vault get_vault(stdex::string_view name);
 	void delete_vault(stdex::string_view name);
 
-	void upload_block(stdex::string_view vaultname,
-	    stdex::string_view blockid, stdex::string_view data);
-	void download_block(stdex::string_view vaultname,
-	    stdex::string_view blockid, callback);
-	void delete_block(stdex::string_view vaultname,
-	    stdex::string_view blockid);
+	void upload_block(stdex::string_view vaultname, sha1_digest blockid,
+	    stdex::string_view data);
+	void download_block(stdex::string_view vaultname, sha1_digest blockid,
+	    callback);
+	void delete_block(stdex::string_view vaultname, sha1_digest blockid);
 
 	file make_file(stdex::string_view vaultname);
 	file get_file(stdex::string_view vaultname, stdex::string_view fileid);
@@ -52,7 +51,7 @@ struct client
 private:
 	std::string url_for_vault(stdex::string_view name);
 	std::string url_for_block(stdex::string_view vaultname,
-	    stdex::string_view blockid);
+	    sha1_digest blockid);
 	std::string url_for_file(stdex::string_view vaultname,
 	    stdex::string_view fileid);
 
@@ -87,11 +86,14 @@ std::string client::url_for_vault(stdex::string_view name)
 
 inline
 std::string client::url_for_block(stdex::string_view vaultname,
-    stdex::string_view blockid)
+    sha1_digest blockid)
 {
 	auto s = url_for_vault(vaultname);
-	s.append("/blocks/");
-	s.append(blockid.data(), blockid.size());
+	auto sz = s.size();
+
+	s.resize(sz + 8 + blockid.size() * 2);
+	hashlib::detail::hexlify_to(blockid, std::copy_n("/blocks/", 8,
+	    begin(s) + sz));
 
 	return s;
 }
@@ -101,8 +103,11 @@ std::string client::url_for_file(stdex::string_view vaultname,
     stdex::string_view fileid)
 {
 	auto s = url_for_vault(vaultname);
-	s.append("/files/");
-	s.append(fileid.data(), fileid.size());
+	auto sz = s.size();
+
+	s.resize(7 + fileid.size());
+	std::copy(begin(fileid), end(fileid), std::copy_n("/files/", 8,
+	    begin(s) + sz) - 1);
 
 	return s;
 }

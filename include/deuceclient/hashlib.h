@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+#ifndef RAX_DEUCECLIENT_HASHLIB_H
+#define RAX_DEUCECLIENT_HASHLIB_H
+
 #include <openssl/sha.h>
 
 #include <array>
@@ -213,3 +216,5 @@ bool operator!=(hasher<HashProvider> const& a, hasher<HashProvider> const& b)
 typedef hasher<detail::sha1_provider> sha1;
 
 }
+
+#endif

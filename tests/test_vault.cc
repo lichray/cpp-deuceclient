@@ -33,7 +33,7 @@ TEST_CASE("block CRUD", "[deuce]")
 
 	{
 		auto txt = get_random_text(2000);
-		auto h = hashlib::sha1(txt).hexdigest();
+		auto h = hashlib::sha1(txt).digest();
 
 		REQUIRE_NOTHROW(vault.upload_block(h, txt));
 
