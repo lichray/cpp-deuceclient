@@ -4,6 +4,26 @@
 
 #include <deuceclient/hashlib.h>
 
+TEST_CASE("hexadecimal")
+{
+	SECTION("round trip")
+	{
+		hashlib::sha1 h;
+
+		REQUIRE(h.digest() == hashlib::unhexlify
+		    <hashlib::sha1::digest_size>(h.hexdigest()));
+	}
+
+	SECTION("malformed hex")
+	{
+		REQUIRE_NOTHROW(hashlib::unhexlify<1>("ef"));
+		REQUIRE_THROWS_AS(hashlib::unhexlify<1>("EF"),
+		    std::invalid_argument&);
+		REQUIRE_THROWS_AS(hashlib::unhexlify<1>("eac"),
+		    std::invalid_argument&);
+	}
+}
+
 TEST_CASE("SHA1")
 {
 #define SRC_LITERAL "natsu no ame"

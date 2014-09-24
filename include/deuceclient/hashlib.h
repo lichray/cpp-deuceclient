@@ -20,7 +20,9 @@
 #include <string>
 #include <algorithm>
 #include <iterator>
-#include <string.h>
+#include <cstring>
+#include <stdexcept>
+#include <stdex/string_view.h>
 
 namespace hashlib
 {
@@ -52,6 +54,80 @@ struct sha1_provider
 	}
 };
 
+template <size_t N, typename OutIt>
+inline
+void hexlify_to(std::array<unsigned char, N> md, OutIt it)
+{
+	auto half_to_hex = [](int c)
+	{
+		// does not work if the source encoding is not
+		// ASCII-compatible
+		return (c > 9) ? c + 'a' - 10 : c + '0';
+	};
+
+	std::for_each(begin(md), end(md), [&](unsigned char c)
+	    {
+		*it = half_to_hex((c >> 4) & 0xf);
+		++it;
+		*it = half_to_hex(c & 0xf);
+		++it;
+	    });
+}
+
+// only accept lower case hexadecimal
+template <size_t N, typename OutIt>
+inline
+void unhexlify_to(stdex::string_view hs, OutIt first)
+{
+	auto hex_to_half = [](char c)
+	{
+		// does not work if the source encoding is not
+		// ASCII-compatible
+		if ('0' <= c and c <= '9')
+			return c - '0';
+		if ('a' <= c and c <= 'f')
+			return c - 'a' + 10;
+
+		throw std::invalid_argument("not a hexadecimal");
+	};
+
+	if (hs.size() != N * 2)
+		throw std::invalid_argument("unexpected hexadecimal length");
+
+	auto it = begin(hs);
+
+	std::generate_n(first, N, [&]() -> int
+	  {
+		auto v = hex_to_half(*it) << 4;
+		++it;
+		v ^= hex_to_half(*it);
+		++it;
+
+		return v;
+	  });
+}
+
+}
+
+template <size_t N>
+inline
+std::string hexlify(std::array<unsigned char, N> md)
+{
+	std::string s;
+	s.resize(N * 2);
+	detail::hexlify_to(md, begin(s));
+
+	return s;
+}
+
+template <size_t N>
+inline
+auto unhexlify(stdex::string_view hs) -> std::array<unsigned char, N>
+{
+	std::array<unsigned char, N> md;
+	detail::unhexlify_to<N>(hs, begin(md));
+
+	return md;
 }
 
 template <typename HashProvider>
@@ -113,33 +189,10 @@ struct hasher
 
 	auto hexdigest() const -> std::string
 	{
-		auto md = digest();
-
-		std::string s;
-		s.resize(digest_size * 2);
-
-		auto it = begin(s);
-
-		std::for_each(begin(md), end(md), [&](unsigned char c)
-		    {
-			*it = half_to_hex((c >> 4) & 0xf);
-			++it;
-			*it = half_to_hex(c & 0xf);
-			++it;
-		    });
-
-		return s;
+		return hexlify(digest());
 	}
 
 private:
-	static
-	char half_to_hex(int c)
-	{
-		// does not work if the source encoding is not
-		// ASCII-compatible
-		return (c > 9) ? c + 'a' - 10 : c + '0';
-	}
-
 	context_type ctx_;
 };
 
