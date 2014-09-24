@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef RAX_DEUCECLIENT_BLOCK_ARRANGEMENT_H
-#define RAX_DEUCECLIENT_BLOCK_ARRANGEMENT_H
+#ifndef RAX_DEUCECLIENT_BLOCK__ARRANGEMENT_H
+#define RAX_DEUCECLIENT_BLOCK__ARRANGEMENT_H
 
 #include <memory>
 #include <cstdint>
