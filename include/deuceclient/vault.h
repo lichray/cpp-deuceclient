@@ -17,14 +17,17 @@
 #ifndef RAX_DEUCECLIENT_VAULT_H
 #define RAX_DEUCECLIENT_VAULT_H
 
-#include "__common.h"
 #include "clientfwd.h"
 #include "file.h"
+
+#include <functional>
 
 namespace rax
 {
 namespace deuceclient
 {
+
+typedef std::function<size_t(char*, size_t)>	callback;
 
 struct vault
 {
