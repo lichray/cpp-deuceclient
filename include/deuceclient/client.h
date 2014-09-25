@@ -98,7 +98,7 @@ std::string client::url_for_file(stdex::string_view vaultname,
 	auto s = url_for_vault(vaultname);
 	auto sz = s.size();
 
-	s.resize(7 + fileid.size());
+	s.resize(sz + 7 + fileid.size());
 	std::copy(begin(fileid), end(fileid), std::copy_n("/files/", 8,
 	    begin(s) + sz) - 1);
 
