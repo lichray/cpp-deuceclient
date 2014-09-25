@@ -47,6 +47,12 @@ struct client
 	void delete_file(stdex::string_view vaultname,
 	    stdex::string_view fileid);
 
+	auto assign_blocks(stdex::string_view vaultname,
+	    stdex::string_view fileid, block_arrangement& ba)
+		-> std::vector<sha1_digest>;
+	void finalize_file(stdex::string_view vaultname,
+	    stdex::string_view fileid, int64_t len);
+
 private:
 	std::string url_for_vault(stdex::string_view name);
 	std::string url_for_block(stdex::string_view vaultname,

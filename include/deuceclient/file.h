@@ -38,6 +38,9 @@ struct file
 
 	stdex::string_view id() const;
 
+	auto assign_blocks(block_arrangement& ba) -> std::vector<sha1_digest>;
+	void finalize_file(int64_t len);
+
 	friend inline
 	bool operator==(file const& a, file const& b)
 	{

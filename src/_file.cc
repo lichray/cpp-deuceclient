@@ -15,9 +15,14 @@
  */
 
 #include <httpverbs/httpverbs.h>
+#include <rapidjson/internal/itoa.h>
 
 #include <deuceclient/client.h>
 #include <deuceclient/exceptions.h>
+
+#include "json_parsers.h"
+
+using namespace httpverbs::keywords;
 
 namespace rax
 {
@@ -51,6 +56,40 @@ void client::delete_file(stdex::string_view vaultname,
     stdex::string_view fileid)
 {
 	do_delete(url_for_file(vaultname, fileid));
+}
+
+auto client::assign_blocks(stdex::string_view vaultname,
+    stdex::string_view fileid, block_arrangement& ba)
+	-> std::vector<sha1_digest>
+{
+	auto hdrs = common_hdrs_;
+	hdrs.add("Content-Type", "application/json");
+
+	// XXX should use PATCH
+	auto resp = httpverbs::post(url_for_file(vaultname, fileid),
+	    std::move(hdrs), data_from(ba.text()));
+
+	expecting_server_response(200, resp);
+	ba.clear();
+
+	return parse_list_of_sha1(resp.content.data());
+}
+
+void client::finalize_file(stdex::string_view vaultname,
+    stdex::string_view fileid, int64_t len)
+{
+	auto hdrs = common_hdrs_;
+	char buf[22];
+	*rapidjson::internal::i64toa(len, buf) = '\0';
+	hdrs.add("X-File-Length", buf);
+
+	// XXX should not require
+	hdrs.add("Content-Length", "0");
+
+	auto resp = httpverbs::post(url_for_file(vaultname, fileid),
+	    std::move(hdrs));
+
+	expecting_server_response(200, resp);
 }
 
 }
