@@ -18,7 +18,9 @@
 #define RAX_DEUCECLIENT_FILE_H
 
 #include "clientfwd.h"
+#include "block_arrangement.h"
 
+#include <vector>
 #include <stdex/string_view.h>
 
 namespace rax

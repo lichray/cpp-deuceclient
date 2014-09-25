@@ -14,39 +14,17 @@
  * limitations under the License.
  */
 
-#ifndef RAX_DEUCECLIENT_BLOCK__ARRANGEMENT_H
-#define RAX_DEUCECLIENT_BLOCK__ARRANGEMENT_H
+#ifndef _RAX_DEUCECLIENT_JSON__PARSERS_H
+#define _RAX_DEUCECLIENT_JSON__PARSERS_H
 
-#include "hashlib.h"
-
-#include <memory>
-#include <cstdint>
+#include <deuceclient/file.h>
 
 namespace rax
 {
 namespace deuceclient
 {
 
-typedef hashlib::sha1::digest_type	sha1_digest;
-
-struct block_arrangement
-{
-	block_arrangement();
-	~block_arrangement();
-
-	block_arrangement(block_arrangement&& other);
-	block_arrangement& operator=(block_arrangement&& other);
-
-	void add(sha1_digest blockid, int64_t offset);
-	void clear();
-
-	stdex::string_view text();
-
-private:
-	struct impl;
-
-	std::unique_ptr<impl> impl_;
-};
+auto parse_list_of_sha1(char const* src) -> std::vector<sha1_digest>;
 
 }
 }

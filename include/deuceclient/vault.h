@@ -19,7 +19,6 @@
 
 #include "clientfwd.h"
 #include "file.h"
-#include "hashlib.h"
 
 #include <functional>
 
@@ -29,7 +28,6 @@ namespace deuceclient
 {
 
 typedef std::function<size_t(char*, size_t)>	callback;
-typedef hashlib::sha1::digest_type		sha1_digest;
 
 struct vault
 {

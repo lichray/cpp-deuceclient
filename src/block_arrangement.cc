@@ -25,12 +25,28 @@ namespace deuceclient
 
 using namespace rapidjson;
 
+struct hexdigest_writer : Writer<StringBuffer>
+{
+	explicit hexdigest_writer(StringBuffer& os) :
+		Writer<StringBuffer>(os)
+	{}
+
+	template <typename T>
+	void Hexlify(T t)
+	{
+		Prefix(kStringType);
+		os_->Put('\"');
+		hashlib::detail::hexlify_to(t, os_->Push(t.size() * 2));
+		os_->Put('\"');
+	}
+};
+
 struct block_arrangement::impl
 {
 	impl() : writer(buffer) {}
 
 	StringBuffer buffer;
-	Writer<StringBuffer> writer;
+	hexdigest_writer writer;
 };
 
 block_arrangement::block_arrangement() :
@@ -53,10 +69,10 @@ block_arrangement& block_arrangement::operator=(block_arrangement&& other)
 block_arrangement::~block_arrangement()
 {}
 
-void block_arrangement::add(stdex::string_view blockid, int64_t offset)
+void block_arrangement::add(sha1_digest blockid, int64_t offset)
 {
 	impl_->writer.StartArray();
-	impl_->writer.String(blockid.data(), blockid.size());
+	impl_->writer.Hexlify(blockid);
 	impl_->writer.Int64(offset);
 	impl_->writer.EndArray();
 }
