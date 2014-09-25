@@ -16,20 +16,32 @@
 
 #include <deuceclient/exceptions.h>
 
-#include <boost/lexical_cast.hpp>
-
-#include <string>
-#include <stdlib.h>
-
 namespace rax
 {
 namespace deuceclient
 {
 
+template <int N, typename Int, typename BidirIt>
+inline
+void format_digits_backward(Int i, BidirIt it)
+{
+	if (N != 0)
+	{
+		*--it = i % 10 + '0';
+		format_digits_backward<N != 0 ? N - 1 : 0>(i / 10, it);
+	}
+}
+
 inline
 std::string errmsg_from_code(int n)
 {
-	return "response [" + boost::lexical_cast<std::string>(n) + "]";
+	if (not (100 <= n and n < 1000))
+		return "invalid status code";
+
+	std::string s = "response [   ]";
+	format_digits_backward<3>(n, end(s) - 1);
+
+	return s;
 }
 
 unexpected_server_response::unexpected_server_response(int status_code) :
