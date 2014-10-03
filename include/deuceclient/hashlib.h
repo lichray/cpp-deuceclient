@@ -59,7 +59,7 @@ struct sha1_provider
 
 template <size_t N, typename OutIt>
 inline
-void hexlify_to(std::array<unsigned char, N> md, OutIt it)
+OutIt hexlify_to(std::array<unsigned char, N> md, OutIt it)
 {
 	auto half_to_hex = [](int c)
 	{
@@ -75,12 +75,14 @@ void hexlify_to(std::array<unsigned char, N> md, OutIt it)
 		*it = half_to_hex(c & 0xf);
 		++it;
 	    });
+
+	return it;
 }
 
 // only accept lower case hexadecimal
 template <size_t N, typename OutIt>
 inline
-void unhexlify_to(stdex::string_view hs, OutIt first)
+OutIt unhexlify_to(stdex::string_view hs, OutIt first)
 {
 	auto hex_to_half = [](char c)
 	{
@@ -99,7 +101,7 @@ void unhexlify_to(stdex::string_view hs, OutIt first)
 
 	auto it = begin(hs);
 
-	std::generate_n(first, N, [&]() -> int
+	return std::generate_n(first, N, [&]() -> int
 	  {
 		auto v = hex_to_half(*it) << 4;
 		++it;

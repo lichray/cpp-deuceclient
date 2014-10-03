@@ -19,15 +19,12 @@
 
 #include "clientfwd.h"
 #include "file.h"
-
-#include <functional>
+#include "bundle.h"
 
 namespace rax
 {
 namespace deuceclient
 {
-
-typedef std::function<size_t(char*, size_t)>	callback;
 
 struct vault
 {
