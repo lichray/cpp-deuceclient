@@ -40,6 +40,7 @@ struct client
 	void download_block(stdex::string_view vaultname, sha1_digest blockid,
 	    callback);
 	void delete_block(stdex::string_view vaultname, sha1_digest blockid);
+	void upload_bundle(stdex::string_view vaultname, bundle& bs);
 
 	file make_file(stdex::string_view vaultname);
 	void download_file(stdex::string_view vaultname,

@@ -35,6 +35,7 @@ struct vault
 	void upload_block(sha1_digest blockid, stdex::string_view data);
 	void download_block(sha1_digest blockid, callback);
 	void delete_block(sha1_digest blockid);
+	void upload_bundle(bundle& bs);
 
 	file make_file();
 	void download_file(stdex::string_view fileid, callback);

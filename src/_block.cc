@@ -49,5 +49,17 @@ void client::delete_block(stdex::string_view vaultname, sha1_digest blockid)
 	do_delete(url_for_block(vaultname, blockid));
 }
 
+void client::upload_bundle(stdex::string_view vaultname, bundle& bs)
+{
+	httpverbs::request req("POST", url_for_vault(vaultname) + "/blocks");
+	req.headers = common_hdrs_;
+	req.headers.add("Content-Type", "application/msgpack");
+
+	auto resp = req.perform(bs.serialized_size(), bs.get_serializer());
+
+	expecting_server_response(201, resp);
+	bs.clear();
+}
+
 }
 }

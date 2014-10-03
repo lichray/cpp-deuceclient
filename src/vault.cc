@@ -36,6 +36,11 @@ void vault::delete_block(sha1_digest blockid)
 	client_.delete_block(vaultname_, blockid);
 }
 
+void vault::upload_bundle(bundle& bs)
+{
+	client_.upload_bundle(vaultname_, bs);
+}
+
 file vault::make_file()
 {
 	return client_.make_file(vaultname_);
