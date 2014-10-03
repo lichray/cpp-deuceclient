@@ -44,17 +44,9 @@ std::string errmsg_from_code(int n)
 	return s;
 }
 
-unexpected_server_response::unexpected_server_response(int status_code) :
+error::error(int status_code) :
 	std::runtime_error(errmsg_from_code(status_code)),
 	status_code_(status_code)
-{}
-
-not_found::not_found() :
-	error("resource not exist")
-{}
-
-cannot_delete::cannot_delete() :
-	error("resource in use")
 {}
 
 }

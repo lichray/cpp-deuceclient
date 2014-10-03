@@ -31,18 +31,12 @@ void client::do_download(std::string url, callback f)
 
 	auto resp = req.perform(std::move(f));
 
-	if (resp.status_code == 404)
-		throw not_found();
-
 	expecting_server_response(200, resp);
 }
 
 void client::do_delete(std::string url)
 {
 	auto resp = httpverbs::delete_(std::move(url), common_hdrs_);
-
-	if (resp.status_code == 412)
-		throw cannot_delete();
 
 	expecting_server_response(204, resp);
 }

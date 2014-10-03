@@ -24,9 +24,9 @@ namespace rax
 namespace deuceclient
 {
 
-struct unexpected_server_response : std::runtime_error
+struct error : std::runtime_error
 {
-	explicit unexpected_server_response(int status_code);
+	explicit error(int status_code);
 
 	int status_code() const
 	{
@@ -37,28 +37,11 @@ private:
 	int const status_code_;
 };
 
-struct error : std::runtime_error
-{
-	error(char const* msg) :
-		std::runtime_error(msg)
-	{}
-};
-
-struct not_found : error
-{
-	not_found();
-};
-
-struct cannot_delete : error
-{
-	cannot_delete();
-};
-
 template <typename RespType>
 inline void expecting_server_response(int status_code, RespType const& resp)
 {
 	if (resp.status_code != status_code)
-		throw unexpected_server_response(resp.status_code);
+		throw error(resp.status_code);
 }
 
 }
