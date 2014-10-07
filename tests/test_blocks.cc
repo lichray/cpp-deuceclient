@@ -12,7 +12,7 @@ TEST_CASE("bundle upload", "[deuce]")
 	    "sample_project_id");
 	auto vault = client.create_vault("log-horizon");
 
-	deuceclient::bundle bs;
+	deuceclient::unmanaged_bundle bs;
 	deuceclient::block_arrangement ba;
 
 	// empty bundle

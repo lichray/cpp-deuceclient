@@ -13,7 +13,7 @@ deuceclient::sha1_digest h3 = { "wake ga nai        " };
 TEST_CASE("msgpack of blocks")
 {
 	char buf[60];
-	auto bs = deuceclient::bundle();
+	auto bs = deuceclient::unmanaged_bundle();
 
 	REQUIRE(bs.empty());
 	REQUIRE(bs.get_serializer()(buf, sizeof(buf)) == bs.serialized_size());
