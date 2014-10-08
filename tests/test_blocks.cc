@@ -19,13 +19,20 @@ TEST_CASE("bundle upload", "[deuce]")
 	REQUIRE_NOTHROW(vault.upload_bundle(bs));
 
 	// random blocks
+	int64_t offset = 0;
+
 	for (int n = 0; n < 10; ++n)
 	{
 		auto blk = get_random_block();
-		auto h = hashlib::sha1(blk).digest();
 
-		bs.add_block(h, stdex::string_view(blk.data(), blk.size()));
-		ba.add(h, n * blk.size());
+		bs.add_block(blk);
+
+		size_t end_of_block;
+		deuceclient::sha1_digest blockid;
+		std::tie(end_of_block, blockid) = bs.blocks().back();
+
+		ba.add(blockid, offset);
+		offset = end_of_block;
 	}
 
 	auto sz = bs.size();

@@ -34,6 +34,10 @@ typedef std::function<size_t(char*, size_t)>	callback;
 
 struct bundle
 {
+private:
+	typedef std::tuple<size_t, sha1_digest>	block_info;
+
+public:
 	bundle();
 
 	bool empty() const;
@@ -42,13 +46,13 @@ struct bundle
 
 	void clear();
 
+	auto blocks() const -> std::vector<block_info> const&;
+
 	size_t serialized_size() const;
 	callback get_serializer() const;
 
 protected:
-	typedef std::tuple<size_t, sha1_digest>	block_info;
-
-	void mark_new_block(sha1_digest blockid, size_t blocksize);
+	void mark_new_block(size_t blocksize);
 
 	char* gbase() const;
 	char* egptr() const;
@@ -64,13 +68,14 @@ private:
 
 struct unmanaged_bundle : bundle
 {
-	void add_block(sha1_digest blockid, stdex::string_view data)
+	template <typename StringLike>
+	void add_block(StringLike const& data)
 	{
 		BOOST_ASSERT_MSG((max_size() - size()) >= data.size(),
 		    "bundle size overflow");
 
-		data.copy(egptr(), data.size());
-		mark_new_block(blockid, data.size());
+		std::copy_n(data.data(), data.size(), egptr());
+		mark_new_block(data.size());
 	}
 };
 
@@ -103,9 +108,16 @@ void bundle::clear()
 }
 
 inline
-void bundle::mark_new_block(sha1_digest blockid, size_t blocksize)
+auto bundle::blocks() const -> std::vector<block_info> const&
 {
-	pos_.push_back(std::make_tuple(size() + blocksize, blockid));
+	return pos_;
+}
+
+inline
+void bundle::mark_new_block(size_t blocksize)
+{
+	pos_.push_back(std::make_tuple(size() + blocksize,
+	    hashlib::sha1(egptr(), blocksize).digest()));
 }
 
 inline

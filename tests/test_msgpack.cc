@@ -6,10 +6,6 @@
 
 using namespace rax;
 
-deuceclient::sha1_digest h1 = { "ore no imouto ga   " };
-deuceclient::sha1_digest h2 = { "konnani kawaii     " };
-deuceclient::sha1_digest h3 = { "wake ga nai        " };
-
 TEST_CASE("msgpack of blocks")
 {
 	char buf[60];
@@ -18,9 +14,9 @@ TEST_CASE("msgpack of blocks")
 	REQUIRE(bs.empty());
 	REQUIRE(bs.get_serializer()(buf, sizeof(buf)) == bs.serialized_size());
 
-	bs.add_block(h1, "");
-	bs.add_block(h2, get_random_text(100));
-	bs.add_block(h3, "portable");
+	bs.add_block(stdex::string_view(""));
+	bs.add_block(get_random_text(100));
+	bs.add_block(stdex::string_view("portable"));
 
 	REQUIRE(bs.size() == 108);
 
