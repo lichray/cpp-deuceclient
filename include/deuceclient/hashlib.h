@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef RAX_DEUCECLIENT_HASHLIB_H
-#define RAX_DEUCECLIENT_HASHLIB_H
+#ifndef _HASHLIB_H
+#define _HASHLIB_H
 
 #include <openssl/sha.h>
 
@@ -25,7 +25,7 @@
 #include <iterator>
 #include <cstring>
 #include <stdexcept>
-#include <stdex/string_view.h>
+#include "string_view.h"
 
 namespace hashlib
 {

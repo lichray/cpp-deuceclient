@@ -21,7 +21,7 @@
 #include "block_arrangement.h"
 
 #include <vector>
-#include <stdex/string_view.h>
+#include "string_view.h"
 
 namespace rax
 {
