@@ -103,12 +103,12 @@ struct basic_string_view
 
 	constexpr iterator begin() const noexcept
 	{
-		return it_;
+		return iterator(it_);
 	}
 
 	constexpr iterator end() const noexcept
 	{
-		return it_ + sz_;
+		return iterator(it_ + sz_);
 	}
 
 	constexpr const_iterator cbegin() const noexcept
@@ -181,7 +181,7 @@ struct basic_string_view
 
 	constexpr CharT const* data() const noexcept
 	{
-		return &*it_;
+		return it_;
 	}
 
 	void clear() noexcept
@@ -396,7 +396,7 @@ private:
 			return it - begin();
 	}
 
-	iterator it_;
+	const_pointer it_;
 	size_type sz_;
 };
 

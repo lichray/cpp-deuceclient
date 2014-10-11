@@ -16,6 +16,8 @@
 
 #include <deuceclient/exceptions.h>
 
+#include <string>
+
 namespace rax
 {
 namespace deuceclient

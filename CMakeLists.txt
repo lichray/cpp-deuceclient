@@ -28,7 +28,6 @@ include_directories(${OPENSSL_INCLUDE_DIR})
 include_directories(3rdparty/include)
 include_directories(include)
 
-file(GLOB restclient_srcs 3rdparty/src/restclient/*.cpp)
 file(GLOB deuceclient_srcs src/*.cc)
 file(GLOB tests_srcs tests/*.cc)
 
