@@ -19,5 +19,6 @@
 
 #include "client.h"
 #include "exceptions.h"
+#include "rabin_boundary.h"
 
 #endif

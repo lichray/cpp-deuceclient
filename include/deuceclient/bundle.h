@@ -22,6 +22,8 @@
 #include <vector>
 #include <tuple>
 #include <functional>
+#include <cerrno>
+#include <system_error>
 
 #include <boost/assert.hpp>
 
@@ -77,6 +79,103 @@ struct unmanaged_bundle : bundle
 		std::copy_n(data.data(), data.size(), egptr());
 		mark_new_block(data.size());
 	}
+};
+
+template <typename Algorithm>
+struct managed_bundle : bundle
+{
+	managed_bundle() :
+		pptr_(pbase()),
+		epptr_(pbase()),
+		needs_reset_(false)
+	{}
+
+	template <typename Reader>
+	bool consume(Reader reader)
+	{
+		std::error_code ec;
+		auto is_full = consume(std::move(reader), ec);
+
+		if (ec)
+			throw std::system_error(ec);
+
+		return is_full;
+	}
+
+	template <typename Reader>
+	bool consume(Reader reader, std::error_code& ec)
+	{
+		if (needs_reset_)
+		{
+			epptr_ = std::move(pptr_, epptr_, pbase());
+			pptr_ = pbase();
+			needs_reset_ = false;
+		}
+
+		BOOST_ASSERT_MSG(not buffer_is_full(),
+		    "buffer size overflow");
+
+		auto len = reader(epptr_, unused_blen());
+
+		if (len < 0)
+		{
+			ec.assign(errno, std::system_category());
+			return false;
+		}
+
+		epptr_ += len;
+		pptr_ = split_into_blocks(pptr_, epptr_,
+		    size_t(len) < unused_blen());
+
+		return needs_reset_ = buffer_is_full();
+	}
+
+	Algorithm& boundary()
+	{
+		return algo_;
+	}
+
+private:
+	size_t unused_blen() const
+	{
+		return max_size() - (epptr_ - gbase());
+	}
+
+	bool buffer_is_full() const
+	{
+		return unused_blen() == 0;
+	}
+
+	char* split_into_blocks(char* first, char* last, bool reached_eof)
+	{
+		auto lbp = first;
+
+		while (first != last)
+		{
+			algo_.process_byte(*first++);
+			auto current_size = first - lbp;
+
+			if ((first == last and reached_eof) or
+			    algo_.reached_boundary(current_size))
+			{
+				mark_new_block(current_size);
+				lbp = first;
+				algo_.reset();
+			}
+		}
+
+		return lbp;
+	}
+
+	char* pbase() const
+	{
+		return gbase();
+	}
+
+	char* pptr_;
+	char* epptr_;
+	bool needs_reset_;
+	Algorithm algo_;
 };
 
 inline
