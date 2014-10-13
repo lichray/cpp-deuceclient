@@ -24,7 +24,7 @@ namespace rax
 namespace deuceclient
 {
 
-void client::do_download(std::string url, callback f)
+void client::do_download(std::string&& url, callback&& f)
 {
 	httpverbs::request req("GET", std::move(url));
 	req.headers = common_hdrs_;
@@ -34,7 +34,7 @@ void client::do_download(std::string url, callback f)
 	expecting_server_response(200, resp);
 }
 
-void client::do_delete(std::string url)
+void client::do_delete(std::string&& url)
 {
 	auto resp = httpverbs::delete_(std::move(url), common_hdrs_);
 

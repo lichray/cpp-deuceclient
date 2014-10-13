@@ -46,18 +46,6 @@ file client::make_file(stdex::string_view vaultname)
 	    last_component(resp.headers["location"]), *this);
 }
 
-void client::download_file(stdex::string_view vaultname,
-    stdex::string_view fileid, callback f)
-{
-	do_download(url_for_file(vaultname, fileid), std::move(f));
-}
-
-void client::delete_file(stdex::string_view vaultname,
-    stdex::string_view fileid)
-{
-	do_delete(url_for_file(vaultname, fileid));
-}
-
 auto client::assign_blocks(stdex::string_view vaultname,
     stdex::string_view fileid, block_arrangement& ba)
 	-> std::vector<sha1_digest>

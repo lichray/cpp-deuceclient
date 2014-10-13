@@ -61,8 +61,8 @@ private:
 	std::string url_for_file(stdex::string_view vaultname,
 	    stdex::string_view fileid);
 
-	void do_download(std::string url, callback);
-	void do_delete(std::string url);
+	void do_download(std::string&& url, callback&&);
+	void do_delete(std::string&& url);
 
 	std::string prefix_;
 	httpverbs::header_dict common_hdrs_;
@@ -110,6 +110,39 @@ std::string client::url_for_file(stdex::string_view vaultname,
 	    begin(s) + sz) - 1);
 
 	return s;
+}
+
+inline
+void client::delete_vault(stdex::string_view name)
+{
+	do_delete(url_for_vault(name));
+}
+
+inline
+void client::download_block(stdex::string_view vaultname, sha1_digest blockid,
+    callback f)
+{
+	do_download(url_for_block(vaultname, blockid), std::move(f));
+}
+
+inline
+void client::delete_block(stdex::string_view vaultname, sha1_digest blockid)
+{
+	do_delete(url_for_block(vaultname, blockid));
+}
+
+inline
+void client::download_file(stdex::string_view vaultname,
+    stdex::string_view fileid, callback f)
+{
+	do_download(url_for_file(vaultname, fileid), std::move(f));
+}
+
+inline
+void client::delete_file(stdex::string_view vaultname,
+    stdex::string_view fileid)
+{
+	do_delete(url_for_file(vaultname, fileid));
 }
 
 }

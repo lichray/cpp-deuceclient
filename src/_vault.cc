@@ -42,10 +42,5 @@ vault client::get_vault(stdex::string_view name)
 	return vault(name.to_string(), *this);
 }
 
-void client::delete_vault(stdex::string_view name)
-{
-	do_delete(url_for_vault(name));
-}
-
 }
 }

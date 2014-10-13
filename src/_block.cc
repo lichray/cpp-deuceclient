@@ -38,17 +38,6 @@ void client::upload_block(stdex::string_view vaultname, sha1_digest blockid,
 	expecting_server_response(201, resp);
 }
 
-void client::download_block(stdex::string_view vaultname, sha1_digest blockid,
-    callback f)
-{
-	do_download(url_for_block(vaultname, blockid), std::move(f));
-}
-
-void client::delete_block(stdex::string_view vaultname, sha1_digest blockid)
-{
-	do_delete(url_for_block(vaultname, blockid));
-}
-
 void client::upload_bundle(stdex::string_view vaultname, bundle& bs)
 {
 	httpverbs::request req("POST", url_for_vault(vaultname) + "/blocks");
