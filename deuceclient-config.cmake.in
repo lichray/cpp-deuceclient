@@ -1,0 +1,9 @@
+# - Config file for the deuceclient package
+# It defines the following variables
+#  deuceclient_INCLUDE_DIRS - include directories for deuceclient
+#  deuceclient_LIBRARIES    - libraries to link against
+
+include(@CMAKE_INSTALL_PREFIX@/lib/cmake/deuceclient/deuceclient-targets.cmake)
+
+set(deuceclient_INCLUDE_DIRS @CMAKE_INSTALL_PREFIX@/include @_inc_dir@)
+set(deuceclient_LIBRARIES deuceclient)
