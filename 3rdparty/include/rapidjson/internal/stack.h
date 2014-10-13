@@ -21,8 +21,35 @@
 #ifndef RAPIDJSON_INTERNAL_STACK_H_
 #define RAPIDJSON_INTERNAL_STACK_H_
 
+#include <type_traits>
+#include <limits>
+#include <algorithm>
+
+#if defined(_MSC_VER)
+#define NOMINMAX
+#endif
+
 namespace rapidjson {
 namespace internal {
+
+template <int N, typename Int>
+inline RAPIDJSON_FORCEINLINE Int or_shift(Int n)
+{
+    auto r = n | (n >> N);
+
+    if (N == 1)
+        return r;
+    else
+        return or_shift<N == 1 ? 1 : N / 2>(r);
+}
+
+template <typename Int>
+inline auto pow2_roundup(Int n) -> typename std::make_unsigned<Int>::type
+{
+    typedef typename std::make_unsigned<Int>::type R;
+
+    return or_shift<std::numeric_limits<R>::digits / 2>(R(n) - 1) + 1;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Stack
@@ -97,19 +124,9 @@ public:
 private:
     template<typename T>
     void Expand(size_t count) {
-        // Only expand the capacity if the current stack exists. Otherwise just create a stack with initial capacity.
-        size_t newCapacity;
-        if (stack_ == 0)
-            newCapacity = initialCapacity_;
-        else {
-            newCapacity = GetCapacity();
-            newCapacity += (newCapacity + 1) / 2;
-        }
-        size_t newSize = GetSize() + sizeof(T) * count;
-        if (newCapacity < newSize)
-            newCapacity = newSize;
-
-        Resize(newCapacity);
+        // Only expand the capacity if the current stack exists. Otherwise create a stack based on initial capacity.
+        Resize(pow2_roundup(
+            std::max(initialCapacity_, GetSize() + sizeof(T) * count)));
     }
 
     void Resize(size_t newCapacity) {
