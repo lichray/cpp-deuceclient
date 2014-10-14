@@ -18,7 +18,9 @@ TEST_CASE("split random data with rabin boundary", "[deuce]")
 
 	deuceclient::managed_bundle<rabin_boundary> bs;
 	deuceclient::block_arrangement ba;
-	randomstream src(6 * 1024 * 1024);
+
+	int target_file_size = (10 * 1024 - 100) * 1024;
+	randomstream src(target_file_size);
 
 	bs.boundary().set_limits(14843, 17432, 90406);
 
@@ -49,7 +51,7 @@ TEST_CASE("split random data with rabin boundary", "[deuce]")
 
 	} while (bundle_is_full);
 
-	REQUIRE(file_size == 6 * 1024 * 1024);
+	REQUIRE(file_size == target_file_size);
 
 	auto f = vault.make_file();
 	auto v = f.assign_blocks(ba);

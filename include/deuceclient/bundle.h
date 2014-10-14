@@ -123,9 +123,10 @@ struct managed_bundle : bundle
 			return false;
 		}
 
+		bool reached_eof = size_t(len) < unused_blen();
+
 		epptr_ += len;
-		pptr_ = split_into_blocks(pptr_, epptr_,
-		    size_t(len) < unused_blen());
+		pptr_ = split_into_blocks(pptr_, epptr_, reached_eof);
 
 		return needs_reset_ = buffer_is_full();
 	}
