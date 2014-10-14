@@ -6,6 +6,7 @@
 build/
 Makefile
 /*.cmake
+demo/*.cmake
 CMakeCache.txt
 CMakeFiles/
 install_manifest.txt
