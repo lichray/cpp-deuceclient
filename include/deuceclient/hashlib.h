@@ -79,6 +79,54 @@ OutIt hexlify_to(std::array<unsigned char, N> md, OutIt it)
 	return it;
 }
 
+struct sha256_provider
+{
+	typedef SHA256_CTX context_type;
+	static const size_t digest_size = SHA256_DIGEST_LENGTH;
+
+	static
+	int init(context_type* ctx)
+	{
+		return SHA256_Init(ctx);
+	}
+
+	static
+	int update(context_type* ctx, void const* data, size_t len)
+	{
+		return SHA256_Update(ctx, data, len);
+	}
+
+	static
+	int final(unsigned char* md, context_type* ctx)
+	{
+		return SHA256_Final(md, ctx);
+	}
+};
+
+struct sha512_provider
+{
+	typedef SHA512_CTX context_type;
+	static const size_t digest_size = SHA512_DIGEST_LENGTH;
+
+	static
+	int init(context_type* ctx)
+	{
+		return SHA512_Init(ctx);
+	}
+
+	static
+	int update(context_type* ctx, void const* data, size_t len)
+	{
+		return SHA512_Update(ctx, data, len);
+	}
+
+	static
+	int final(unsigned char* md, context_type* ctx)
+	{
+		return SHA512_Final(md, ctx);
+	}
+};
+
 // only accept lower case hexadecimal
 template <size_t N, typename OutIt>
 inline
@@ -215,7 +263,9 @@ bool operator!=(hasher<HashProvider> const& a, hasher<HashProvider> const& b)
 	return !(a == b);
 }
 
-typedef hasher<detail::sha1_provider> sha1;
+typedef hasher<detail::sha1_provider>	sha1;
+typedef hasher<detail::sha256_provider>	sha256;
+typedef hasher<detail::sha512_provider>	sha512;
 
 }
 

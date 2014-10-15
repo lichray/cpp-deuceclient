@@ -78,3 +78,19 @@ TEST_CASE("SHA1")
 		REQUIRE(hobj1.hexdigest() == hobj.hexdigest());
 	}
 }
+
+TEST_CASE("SHA2")
+{
+	SECTION("SHA256 zero-length string")
+	{
+		REQUIRE(hashlib::sha256("").hexdigest() == "e3b0c44298fc1c149a"
+		    "fbf4c8996fb92427ae41e4649b934ca495991b7852b855");
+	}
+
+	SECTION("SHA512 zero-length string")
+	{
+		REQUIRE(hashlib::sha512("").hexdigest() == "cf83e1357eefb8bdf1"
+		    "542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d8"
+		    "5f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e");
+	}
+}
