@@ -37,7 +37,8 @@ typedef std::function<size_t(char*, size_t)>	callback;
 struct bundle
 {
 private:
-	typedef std::tuple<size_t, sha1_digest>	block_info;
+	typedef std::tuple<size_t, sha1_digest>		block_info;
+	typedef std::vector<block_info>::const_iterator	block_info_iter;
 
 public:
 	bundle();
@@ -47,6 +48,9 @@ public:
 	size_t max_size() const;
 
 	void clear();
+
+	size_t size_of_block(block_info_iter it) const;
+	void copy_block(block_info_iter it, bundle& bs) const;
 
 	auto blocks() const -> std::vector<block_info> const&;
 
@@ -205,6 +209,28 @@ inline
 void bundle::clear()
 {
 	pos_.clear();
+}
+
+inline
+size_t bundle::size_of_block(block_info_iter it) const
+{
+	BOOST_ASSERT_MSG(pos_.begin() <= it and it < pos_.end(),
+	    "block not in this bundle");
+
+	auto eob = std::get<0>(*it);
+	return it == pos_.begin() ? eob : eob - std::get<0>(it[-1]);
+}
+
+inline
+void bundle::copy_block(std::vector<block_info>::const_iterator it,
+    bundle& bs) const
+{
+	auto blksize = size_of_block(it);
+	auto first = egptr(*it) - blksize;
+
+	std::copy_n(first, blksize, bs.egptr());
+	bs.pos_.push_back(std::make_tuple(bs.size() + blksize,
+	    std::get<1>(*it)));
 }
 
 inline

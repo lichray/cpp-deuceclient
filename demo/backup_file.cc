@@ -45,12 +45,12 @@ std::string backup_file(char const* filename)
 	auto vault = client.create_vault("demo");
 
 	deuceclient::managed_bundle<rabin_boundary> bs;
+	deuceclient::bundle bn;
 	deuceclient::block_arrangement ba;
 
 	bs.boundary().set_limits(14843, 17432, 90406);
 
 	int64_t file_size = 0;
-	size_t nblocks = 0;
 	bool bundle_is_full;
 
 	auto f = vault.make_file();
@@ -68,6 +68,29 @@ std::string backup_file(char const* filename)
 			break;
 
 		int64_t offset = file_size;
+		size_t nblocks = 0;
+		auto it = bs.blocks().begin();
+
+		auto send_to_dedup = [&]()
+		    {
+			BOOST_FOREACH(auto&& id, f.assign_blocks(ba))
+			{
+				it = std::find_if(it, bs.blocks().end(),
+				    [&](decltype(*it) binfo)
+				    {
+					return std::get<1>(binfo) == id;
+				    });
+
+				if (it == bs.blocks().end())
+					break;
+
+				if (bs.size_of_block(it) >
+				    bn.max_size() - bn.size())
+					vault.upload_bundle(bn);
+
+				bs.copy_block(it, bn);
+			}
+		    };
 
 		BOOST_FOREACH(auto&& t, bs.blocks())
 		{
@@ -82,18 +105,21 @@ std::string backup_file(char const* filename)
 			// keep the payload under 64KB
 			if (nblocks == 1000)
 			{
-				f.assign_blocks(ba);
+				send_to_dedup();
 				nblocks = 0;
 			}
 		}
 
+		if (nblocks > 0)
+			send_to_dedup();
+
 		file_size += bs.size();
-		vault.upload_bundle(bs);
+		bs.clear();
 
 	} while (bundle_is_full);
 
-	if (nblocks > 0)
-		f.assign_blocks(ba);
+	if (bn.size() > 0)
+		vault.upload_bundle(bn);
 
 	f.finalize_file(file_size);
 	delete_file.dismiss();

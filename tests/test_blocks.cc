@@ -6,6 +6,36 @@
 
 using namespace rax;
 
+TEST_CASE("bundle invariants")
+{
+	deuceclient::unmanaged_bundle bs;
+	deuceclient::bundle bn;
+
+	bs.add_block(stdex::string_view(""));
+	auto it = bs.blocks().begin();
+
+	REQUIRE(bs.size() == 0);
+	REQUIRE(bs.size_of_block(it) == 0);
+
+	bs.copy_block(it, bn);
+
+	REQUIRE(bn.blocks().size() == 1);
+	REQUIRE(bn.size_of_block(bn.blocks().begin()) == 0);
+
+	bs.add_block(get_random_text(10));
+	bs.add_block(get_random_text(20));
+
+	bs.copy_block(bs.blocks().begin() + 2, bn);
+	bs.copy_block(bs.blocks().begin() + 1, bn);
+
+	REQUIRE(bn.blocks().size() == 3);
+	REQUIRE(bn.size_of_block(bn.blocks().begin() + 2) == 10);
+
+	bn.clear();
+
+	REQUIRE(bn.blocks().empty());
+}
+
 TEST_CASE("bundle upload", "[deuce]")
 {
 	auto client = deuceclient::client("http://localhost:8080",
