@@ -50,6 +50,7 @@ public:
 	void clear();
 
 	size_t size_of_block(block_info_iter it) const;
+	size_t serialized_size_of_block(block_info_iter it) const;
 	void copy_block(block_info_iter it, bundle& bs) const;
 
 	auto blocks() const -> std::vector<block_info> const&;
@@ -219,6 +220,12 @@ size_t bundle::size_of_block(block_info_iter it) const
 
 	auto eob = std::get<0>(*it);
 	return it == pos_.begin() ? eob : eob - std::get<0>(it[-1]);
+}
+
+inline
+size_t bundle::serialized_size_of_block(block_info_iter it) const
+{
+	return packed_size_of_block_info() + size_of_block(it);
 }
 
 inline

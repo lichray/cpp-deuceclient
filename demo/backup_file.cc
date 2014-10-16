@@ -84,8 +84,11 @@ std::string backup_file(char const* filename)
 				if (it == bs.blocks().end())
 					break;
 
+				// keep the request body under 10MB
 				if (bs.size_of_block(it) >
-				    bn.max_size() - bn.size())
+				    bn.max_size() - bn.size() or
+				    bs.serialized_size_of_block(it) >
+				    10 * 1024 * 1024 - bn.serialized_size())
 					vault.upload_bundle(bn);
 
 				bs.copy_block(it, bn);
