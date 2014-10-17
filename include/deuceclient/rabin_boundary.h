@@ -29,7 +29,7 @@ struct rabin_boundary
 	rabin_boundary();
 
 	void process_byte(unsigned char byte);
-	bool reached_boundary(size_t blksize) const;
+	bool reached_boundary(size_t& size_read);
 	void reset();
 
 	void set_limits(size_t min, size_t average, size_t max);
@@ -39,6 +39,7 @@ private:
 	static const uint64_t break_value = 4;
 
 	rabin_fingerprint<128> rabinfp_;
+	size_t sub_optimal_size_;
 	size_t avg_;
 	size_t min_;
 	size_t max_;
@@ -46,7 +47,8 @@ private:
 
 inline
 rabin_boundary::rabin_boundary() :
-	rabinfp_(fingerprint_pt)
+	rabinfp_(fingerprint_pt),
+	sub_optimal_size_(0)
 {}
 
 inline
@@ -67,17 +69,36 @@ void rabin_boundary::process_byte(unsigned char byte)
 }
 
 inline
-bool rabin_boundary::reached_boundary(size_t blocksize) const
+bool rabin_boundary::reached_boundary(size_t& size_read)
 {
-	return blocksize == max_ or
-	    (blocksize >= min_ and
-	     rabinfp_.value() % avg_ == break_value);
+	if (size_read == max_)
+	{
+		if (sub_optimal_size_ != 0)
+			size_read = sub_optimal_size_;
+
+		return true;
+	}
+
+	if (size_read >= min_)
+	{
+		if (rabinfp_.value() % avg_ == break_value)
+			return true;
+
+		if (rabinfp_.value() % (avg_ / 2) == break_value)
+		{
+			sub_optimal_size_ = size_read;
+			return false;
+		}
+	}
+
+	return false;
 }
 
 inline
 void rabin_boundary::reset()
 {
 	rabinfp_.reset();
+	sub_optimal_size_ = 0;
 }
 
 }

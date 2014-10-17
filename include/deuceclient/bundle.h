@@ -159,12 +159,13 @@ private:
 		while (first != last)
 		{
 			algo_.process_byte(*first++);
-			auto current_size = first - lbp;
+			size_t current_size = first - lbp;
 
 			if ((first == last and reached_eof) or
 			    algo_.reached_boundary(current_size))
 			{
 				mark_new_block(current_size);
+				first = lbp + current_size;
 				lbp = first;
 				algo_.reset();
 			}
