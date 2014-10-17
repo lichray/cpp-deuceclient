@@ -6,7 +6,8 @@
 
 TEST_CASE("httpverbs and libcurl")
 {
-	auto r = httpverbs::get("http://deuce.apiary-mock.com/v1.0/vaults/1");
+	auto r = httpverbs::get("http://private-anon-09fd74706-deuce.apiary-mo"
+	      "ck.com/v1.0/vaults/1");
 
 	CHECK(r.status_code == 200);
 }
