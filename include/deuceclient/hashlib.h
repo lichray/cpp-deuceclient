@@ -57,28 +57,6 @@ struct sha1_provider
 	}
 };
 
-template <size_t N, typename OutIt>
-inline
-OutIt hexlify_to(std::array<unsigned char, N> md, OutIt it)
-{
-	auto half_to_hex = [](int c)
-	{
-		// does not work if the source encoding is not
-		// ASCII-compatible
-		return (c > 9) ? c + 'a' - 10 : c + '0';
-	};
-
-	std::for_each(begin(md), end(md), [&](unsigned char c)
-	    {
-		*it = half_to_hex((c >> 4) & 0xf);
-		++it;
-		*it = half_to_hex(c & 0xf);
-		++it;
-	    });
-
-	return it;
-}
-
 struct sha256_provider
 {
 	typedef SHA256_CTX context_type;
@@ -126,6 +104,28 @@ struct sha512_provider
 		return SHA512_Final(md, ctx);
 	}
 };
+
+template <size_t N, typename OutIt>
+inline
+OutIt hexlify_to(std::array<unsigned char, N> md, OutIt it)
+{
+	auto half_to_hex = [](int c)
+	{
+		// does not work if the source encoding is not
+		// ASCII-compatible
+		return (c > 9) ? c + 'a' - 10 : c + '0';
+	};
+
+	std::for_each(begin(md), end(md), [&](unsigned char c)
+	    {
+		*it = half_to_hex((c >> 4) & 0xf);
+		++it;
+		*it = half_to_hex(c & 0xf);
+		++it;
+	    });
+
+	return it;
+}
 
 // only accept lower case hexadecimal
 template <size_t N, typename OutIt>
