@@ -32,8 +32,6 @@ include_directories(include)
 file(GLOB deuceclient_srcs src/*.cc)
 file(GLOB tests_srcs tests/*.cc)
 
-set(get_pip_py ${CMAKE_SOURCE_DIR}/files/get-pip.py)
-
 add_library(deuceclient STATIC ${deuceclient_srcs})
 
 target_include_directories(deuceclient PUBLIC ${httpverbs_INCLUDE_DIRS})
