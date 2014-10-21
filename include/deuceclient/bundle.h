@@ -81,7 +81,12 @@ struct unmanaged_bundle : bundle
 		BOOST_ASSERT_MSG((max_size() - size()) >= data.size(),
 		    "bundle size overflow");
 
+#if !defined(_MSC_VER)
 		std::copy_n(data.data(), data.size(), egptr());
+#else
+		std::copy_n(data.data(), data.size(),
+		    stdext::make_unchecked_array_iterator(egptr()));
+#endif
 		mark_new_block(data.size());
 	}
 };
@@ -112,7 +117,13 @@ struct managed_bundle : bundle
 	{
 		if (needs_reset_)
 		{
+#if !defined(_MSC_VER)
 			epptr_ = std::move(pptr_, epptr_, pbase());
+#else
+			epptr_ = std::move(pptr_, epptr_,
+			    stdext::make_unchecked_array_iterator(pbase()))
+			    .base();
+#endif
 			pptr_ = pbase();
 			needs_reset_ = false;
 		}
@@ -236,7 +247,12 @@ void bundle::copy_block(std::vector<block_info>::const_iterator it,
 	auto blksize = size_of_block(it);
 	auto first = egptr(*it) - blksize;
 
+#if !defined(_MSC_VER)
 	std::copy_n(first, blksize, bs.egptr());
+#else
+	std::copy_n(first, blksize,
+	    stdext::make_unchecked_array_iterator(bs.egptr()));
+#endif
 	bs.pos_.push_back(std::make_tuple(bs.size() + blksize,
 	    std::get<1>(*it)));
 }

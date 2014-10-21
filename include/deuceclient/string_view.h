@@ -36,6 +36,8 @@
 
 #define constexpr
 #if defined(_MSC_VER)
+#include <ciso646>
+#define NOMINMAX
 #define noexcept throw()
 # if _MSC_VER < 1800
 # define _YOU_JUST_CANNOT_USE_ANYTHING

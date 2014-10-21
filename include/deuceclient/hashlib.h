@@ -116,7 +116,7 @@ OutIt hexlify_to(std::array<unsigned char, N> md, OutIt it)
 		return (c > 9) ? c + 'a' - 10 : c + '0';
 	};
 
-	std::for_each(begin(md), end(md), [&](unsigned char c)
+	std::for_each(md.begin(), md.end(), [&](unsigned char c)
 	    {
 		*it = half_to_hex((c >> 4) & 0xf);
 		++it;
@@ -132,7 +132,7 @@ template <size_t N, typename OutIt>
 inline
 OutIt unhexlify_to(stdex::string_view hs, OutIt first)
 {
-	auto hex_to_half = [](char c)
+	auto hex_to_half = [](char c) -> int
 	{
 		// does not work if the source encoding is not
 		// ASCII-compatible
@@ -149,15 +149,21 @@ OutIt unhexlify_to(stdex::string_view hs, OutIt first)
 
 	auto it = begin(hs);
 
-	return std::generate_n(first, N, [&]() -> int
-	  {
+#if !(defined(_MSC_VER) && _MSC_VER < 1800)
+	return
+#endif
+		std::generate_n(first, N, [&]() -> int
+	    {
 		auto v = hex_to_half(*it) << 4;
 		++it;
 		v ^= hex_to_half(*it);
 		++it;
 
 		return v;
-	  });
+	    });
+#if defined(_MSC_VER) && _MSC_VER < 1800
+	return std::next(first, N);
+#endif
 }
 
 }
@@ -178,7 +184,7 @@ inline
 auto unhexlify(stdex::string_view hs) -> std::array<unsigned char, N>
 {
 	std::array<unsigned char, N> md;
-	detail::unhexlify_to<N>(hs, begin(md));
+	detail::unhexlify_to<N>(hs, md.begin());
 
 	return md;
 }

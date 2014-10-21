@@ -15,3 +15,12 @@ install_manifest.txt
 deuce-prefix/
 Testing/
 DartConfiguration.tcl
+
+# Visual Studio
+/*.vcxproj
+/*.vcxproj.filters
+/*.vcxproj.user
+/*.dir/
+/*.sln
+/*.suo
+/*.sdf

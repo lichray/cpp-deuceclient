@@ -75,19 +75,18 @@ auto make_string_list_handler(F f) -> string_list_handler<F>
 
 auto parse_list_of_sha1(stdex::string_view src) -> std::vector<sha1_digest>
 {
-	auto const digest_size = std::tuple_size<sha1_digest>::value;
-
 	std::vector<sha1_digest> v;
 
 	// estimate number of ids, where each id is hexadecimal length
 	// + 2 double quotes and a comma.  Ensure no reallocation.
-	v.reserve(src.size() / (digest_size * 2 + 3));
+	v.reserve(src.size() / (std::tuple_size<sha1_digest>::value * 2 + 3));
 
 	auto h = make_string_list_handler([&](char const* p, size_t sz)
-	  {
-		v.push_back(hashlib::unhexlify<digest_size>(
+	    {
+		v.push_back(
+		    hashlib::unhexlify<std::tuple_size<sha1_digest>::value>(
 		    stdex::string_view(p, sz)));
-	  });
+	    });
 
 	StringStream ss(src.data());
 	Reader reader;

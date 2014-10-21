@@ -19,6 +19,10 @@
 
 #include <stdexcept>
 
+#if defined(_MSC_VER)
+#include <ciso646>
+#endif
+
 namespace rax
 {
 namespace deuceclient

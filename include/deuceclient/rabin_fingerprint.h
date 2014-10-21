@@ -20,6 +20,10 @@
 #include <cstdint>
 #include <algorithm>
 
+#if defined(_MSC_VER)
+#pragma warning(disable: 4351)
+#endif
+
 namespace rax
 {
 

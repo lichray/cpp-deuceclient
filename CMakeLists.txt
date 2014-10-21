@@ -14,11 +14,16 @@ find_package(OpenSSL REQUIRED)
 
 if(BUILD_TESTING)
 	find_package(Git REQUIRED)
-	find_package(PythonInterp 3.3 REQUIRED)
 endif()
 
 if(NOT MSVC)
 	set(CMAKE_CXX_FLAGS "-Wall -std=c++0x")
+else()
+	foreach(flagvar CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
+	    CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
+		string(REGEX REPLACE "/MD" "/MT" ${flagvar} "${${flagvar}}")
+		string(REGEX REPLACE "/MDd" "/MTd" ${flagvar} "${${flagvar}}")
+	endforeach()
 endif()
 
 include_directories(3rdparty/include)
@@ -50,15 +55,12 @@ if(BUILD_TESTING)
 	    deuce
 	    GIT_REPOSITORY https://github.com/rackerlabs/deuce.git
 	    TIMEOUT 5
-	    UPDATE_COMMAND git pull
+	    UPDATE_COMMAND ${GIT_EXECUTABLE} pull
 	    PATCH_COMMAND sh -c
 	        "git checkout ."
-	    CONFIGURE_COMMAND sh -c
-	        "[ -e venv ] || ${PYTHON_EXECUTABLE} -m venv venv"
-	    BUILD_COMMAND sh -c
-	        ". venv/bin/activate$<SEMICOLON> python ${get_pip_py}"
-	    INSTALL_COMMAND sh -c
-	        ". venv/bin/activate$<SEMICOLON> pip install -e ../deuce")
+	    CONFIGURE_COMMAND ""
+	    BUILD_COMMAND ""
+	    INSTALL_COMMAND "")
 endif()
 
 file(GLOB deuceclient_hdrs include/deuceclient/*.h)

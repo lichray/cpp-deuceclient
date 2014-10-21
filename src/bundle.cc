@@ -40,7 +40,7 @@ namespace deuceclient
 inline
 void pack_block_map_header(char* p, size_t n)
 {
-	*p++ = 0xde;
+	*p++ = '\xde';
 	auto n_be = htobe16(uint16_t(n));
 	memcpy(p, &n_be, sizeof(n_be));
 }
@@ -49,10 +49,15 @@ inline
 void pack_block_info(char* p, size_t n, sha1_digest blockid)
 {
 	// length 40
+#if !defined(_MSC_VER)
 	p = std::copy_n("\xd9\x28", 2, p);
+#else
+	p = std::copy_n("\xd9\x28", 2,
+	    stdext::make_unchecked_array_iterator(p)).base();
+#endif
 	p = hashlib::detail::hexlify_to(blockid, p);
 
-	*p++ = 0xc6;
+	*p++ = '\xc6';
 	auto n_be = htobe32(uint32_t(n));
 	memcpy(p, &n_be, sizeof(n_be));
 }
@@ -99,7 +104,12 @@ callback bundle::get_serializer() const
 			auto len = std::min(blen - (p - bp),
 			    size_t(egptr(*it) - gptr));
 
+#if !defined(_MSC_VER)
 			p = std::copy_n(gptr, len, p);
+#else
+			p = std::copy_n(gptr, len,
+			    stdext::make_unchecked_array_iterator(p)).base();
+#endif
 			gptr += len;
 
 			// finished current block

@@ -18,6 +18,30 @@
 
 #define MSB64 uint64_t(0x8000000000000000)
 
+#if defined(_MSC_VER)
+#include <intrin.h>
+
+__forceinline
+int __builtin_clzll(unsigned long long mask)
+{
+	unsigned long where;
+
+#if defined(_WIN64)
+	if (_BitScanReverse64(&where, mask))
+		return static_cast<int>(63 - where);
+#elif defined(_WIN32)
+	if (_BitScanReverse(&where, static_cast<unsigned long>(mask >> 32)))
+		return static_cast<int>(63 - (where + 32));
+	if (_BitScanReverse(&where, static_cast<unsigned long>(mask)))
+		return static_cast<int>(63 - where);
+#else
+#error "Implementation of __builtin_clzll required"
+#endif
+	return 64;  // UB
+}
+
+#endif
+
 inline
 int fls64(uint64_t x)
 {
