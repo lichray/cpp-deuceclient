@@ -49,13 +49,16 @@ if(BUILD_TESTING)
 		add_test(${test_suite} tests/${test_suite})
 	endforeach()
 
+	file(GLOB deuce_patches files/patch-*)
+
 	ExternalProject_Add(
 	    deuce
 	    GIT_REPOSITORY https://github.com/rackerlabs/deuce.git
 	    TIMEOUT 5
-	    UPDATE_COMMAND ${GIT_EXECUTABLE} pull
-	    PATCH_COMMAND sh -c
-	        "git checkout ."
+	    UPDATE_COMMAND ${GIT_EXECUTABLE}
+		checkout . && ${GIT_EXECUTABLE} pull
+	    PATCH_COMMAND ${GIT_EXECUTABLE}
+		apply -p0 --ignore-whitespace ${deuce_patches}
 	    CONFIGURE_COMMAND ""
 	    BUILD_COMMAND ""
 	    INSTALL_COMMAND "")
