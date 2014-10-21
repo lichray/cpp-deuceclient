@@ -29,12 +29,6 @@ namespace rax
 namespace deuceclient
 {
 
-inline
-std::string last_component(std::string const& url)
-{
-	return url.substr(url.rfind('/') + 1);
-}
-
 file client::make_file(stdex::string_view vaultname)
 {
 	auto resp = httpverbs::post(url_for_vault(vaultname) + "/files",
@@ -42,8 +36,7 @@ file client::make_file(stdex::string_view vaultname)
 
 	expecting_server_response(201, resp);
 
-	return file(vaultname.to_string(),
-	    last_component(resp.headers["location"]), *this);
+	return file(vaultname.to_string(), resp.headers["x-file-id"], *this);
 }
 
 auto client::assign_blocks(stdex::string_view vaultname,
