@@ -88,7 +88,7 @@ std::string backup_file(char const* filename)
 		    [=](char* p, size_t sz)
 		    {
 #if defined(WIN32)
-			return _read(fd, p, sz);
+			return _read(fd, p, unsigned(sz));
 #else
 			return read(fd, p, sz);
 #endif
