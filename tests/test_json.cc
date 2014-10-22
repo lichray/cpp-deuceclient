@@ -9,6 +9,16 @@ using namespace rax;
 deuceclient::sha1_digest h1 = { "sakurasou no pet na" };
 deuceclient::sha1_digest h2 = { "kanojo             " };
 
+TEST_CASE("block_arrangement is movable")
+{
+	deuceclient::block_arrangement ba;
+	ba.add(h1, 1);
+	auto s = ba.text().to_string();
+	auto ba2 = std::move(ba);
+
+	REQUIRE(ba2.text() == s);
+}
+
 TEST_CASE("json to assign blocks")
 {
 	auto ba = deuceclient::block_arrangement();

@@ -43,6 +43,11 @@ private:
 public:
 	bundle();
 
+#if defined(_MSC_VER) && _MSC_VER < 1900
+	bundle(bundle&& other);
+	bundle& operator=(bundle&& other);
+#endif
+
 	bool empty() const;
 	size_t size() const;
 	size_t max_size() const;
@@ -203,6 +208,25 @@ private:
 inline
 bundle::bundle() : buf_(new char[max_size()])
 {}
+
+#if defined(_MSC_VER) && _MSC_VER < 1900
+
+inline
+bundle::bundle(bundle&& other) :
+	buf_(std::move(other.buf_)),
+	pos_(std::move(other.pos_))
+{}
+
+inline
+bundle& bundle::operator=(bundle&& other)
+{
+	buf_ = std::move(other.buf_);
+	pos_ = std::move(other.pos_);
+
+	return *this;
+}
+
+#endif
 
 inline
 bool bundle::empty() const

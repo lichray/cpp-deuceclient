@@ -6,6 +6,24 @@
 
 using namespace rax;
 
+TEST_CASE("bundle is movable")
+{
+	auto bundle_to_str = [](deuceclient::bundle& bs) -> std::string
+	    {
+		std::string s;
+		s.resize(bs.serialized_size());
+		bs.get_serializer()(&*s.begin(), s.size());
+		return s;
+	    };
+
+	deuceclient::unmanaged_bundle bs;
+	bs.add_block(get_random_text(10));
+	auto s = bundle_to_str(bs);
+	deuceclient::bundle bs2 = std::move(bs);
+
+	REQUIRE(bundle_to_str(bs2) == s);
+}
+
 TEST_CASE("msgpack of blocks")
 {
 	char buf[60];
