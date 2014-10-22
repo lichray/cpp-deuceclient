@@ -34,13 +34,12 @@
 #include <functional>
 #include <stdexcept>
 
-#define constexpr
 #if defined(_MSC_VER)
 #include <ciso646>
 #define NOMINMAX
-#define noexcept throw()
-# if _MSC_VER < 1800
-# define _YOU_JUST_CANNOT_USE_ANYTHING
+# if _MSC_VER < 1900
+# define noexcept throw()
+# define constexpr
 # endif
 #endif
 
@@ -158,30 +157,28 @@ struct basic_string_view
 		return size() == 0;
 	}
 
-	// N4023 violations: element access return rvalues.
-
-	constexpr CharT operator[](size_type pos) const
+	constexpr const_reference operator[](size_type pos) const
 	{
 		return it_[pos];
 	}
 
-	constexpr CharT at(size_type pos) const
+	constexpr const_reference at(size_type pos) const
 	{
 		return pos < size() ? (*this)[pos] :
 		    throw std::out_of_range("basic_string_view::at");
 	}
 
-	constexpr CharT front() const
+	constexpr const_reference front() const
 	{
 		return (*this)[0];
 	}
 
-	constexpr CharT back() const
+	constexpr const_reference back() const
 	{
 		return (*this)[size() - 1];
 	}
 
-	constexpr CharT const* data() const noexcept
+	constexpr const_pointer data() const noexcept
 	{
 		return it_;
 	}
@@ -216,7 +213,7 @@ struct basic_string_view
 		std::swap(sz_, sv.sz_);
 	}
 
-#if !defined(_YOU_JUST_CANNOT_USE_ANYTHING)
+#if !(defined(_MSC_VER) && _MSC_VER < 1800)
 
 	template <typename Allocator>
 	explicit operator std::basic_string<CharT, Traits, Allocator>() const
