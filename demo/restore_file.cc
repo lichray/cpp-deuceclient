@@ -7,6 +7,15 @@
 
 #include "defer.h"
 
+#if !(defined(_MSC_VER) && _MSC_VER < 1700)
+#define THROW_ERRNO() throw std::system_error(errno, std::system_category())
+#else
+#define THROW_ERRNO() do {						\
+	std::error_code ec(errno, std::system_category());		\
+	throw std::system_error(ec, ec.message());			\
+} while(0)
+#endif
+
 using namespace rax;
 using namespace httpverbs::keywords;
 
@@ -29,7 +38,7 @@ int main(int argc, char* argv[])
 		errno = 0;
 #endif
 		if (rename(argv[2], argv[1]) == -1)
-			throw std::system_error(errno, std::system_category());
+			THROW_ERRNO();
 	}
 	catch (std::exception& e)
 	{
@@ -47,7 +56,7 @@ void restore_file(char const* fileid)
 #endif
 
 	if (fp == nullptr)
-		throw std::system_error(errno, std::system_category());
+		THROW_ERRNO();
 
 	defer(remove(fileid)) namely(delete_temp);
 	defer(fclose(fp));

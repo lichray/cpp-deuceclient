@@ -15,6 +15,15 @@
 
 #include "defer.h"
 
+#if !(defined(_MSC_VER) && _MSC_VER < 1700)
+#define THROW_ERRNO() throw std::system_error(errno, std::system_category())
+#else
+#define THROW_ERRNO() do {						\
+	std::error_code ec(errno, std::system_category());		\
+	throw std::system_error(ec, ec.message());			\
+} while(0)
+#endif
+
 using namespace rax;
 
 std::string backup_file(char const* filename);
@@ -49,7 +58,7 @@ std::string backup_file(char const* filename)
 #endif
 
 	if (fd == -1)
-		throw std::system_error(errno, std::system_category());
+		THROW_ERRNO();
 
 #if defined(WIN32)
 	defer(_close(fd));

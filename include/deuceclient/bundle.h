@@ -107,7 +107,11 @@ struct managed_bundle : bundle
 		auto is_full = consume(std::move(reader), ec);
 
 		if (ec)
+#if !(defined(_MSC_VER) && _MSC_VER < 1700)
 			throw std::system_error(ec);
+#else
+			throw std::system_error(ec, ec.message());
+#endif
 
 		return is_full;
 	}
