@@ -17,10 +17,10 @@ Testing/
 DartConfiguration.tcl
 
 # Visual Studio
-/*.vcxproj
-/*.vcxproj.filters
-/*.vcxproj.user
-/*.dir/
-/*.sln
-/*.suo
-/*.sdf
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.dir/
+*.sln
+*.suo
+*.sdf

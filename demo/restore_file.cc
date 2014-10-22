@@ -24,6 +24,10 @@ int main(int argc, char* argv[])
 	{
 		restore_file(argv[2]);
 
+#if defined(WIN32)
+		_unlink(argv[1]);
+		errno = 0;
+#endif
 		if (rename(argv[2], argv[1]) == -1)
 			throw std::system_error(errno, std::system_category());
 	}
@@ -35,12 +39,18 @@ int main(int argc, char* argv[])
 
 void restore_file(char const* fileid)
 {
-	auto fp = fopen(fileid, "w");
-	defer(remove(fileid)) namely(delete_temp);
-	defer(fclose(fp));
+#if !defined(_MSC_VER)
+	auto fp = fopen(fileid, "wb");
+#else
+	FILE* fp;
+	fopen_s(&fp, fileid, "wb");
+#endif
 
 	if (fp == nullptr)
 		throw std::system_error(errno, std::system_category());
+
+	defer(remove(fileid)) namely(delete_temp);
+	defer(fclose(fp));
 
 	auto client = deuceclient::client("http://localhost:8080",
 	    "demo_project");

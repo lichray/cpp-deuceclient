@@ -5,7 +5,13 @@
 #include <iostream>
 
 #include <fcntl.h>
+#if defined(WIN32)
+#include <sys/stat.h>
+#include <io.h>
+#include <share.h>
+#else
 #include <unistd.h>
+#endif
 
 #include "defer.h"
 
@@ -35,10 +41,21 @@ int main(int argc, char* argv[])
 
 std::string backup_file(char const* filename)
 {
+#if defined(WIN32)
+	int fd;
+	_sopen_s(&fd, filename, _O_RDONLY | _O_BINARY , _SH_DENYWR, _S_IREAD);
+#else
 	auto fd = open(filename, O_RDONLY);
+#endif
 
 	if (fd == -1)
 		throw std::system_error(errno, std::system_category());
+
+#if defined(WIN32)
+	defer(_close(fd));
+#else
+	defer(close(fd));
+#endif
 
 	auto client = deuceclient::client("http://localhost:8080",
 	    "demo_project");
@@ -61,7 +78,11 @@ std::string backup_file(char const* filename)
 		bundle_is_full = bs.consume(
 		    [=](char* p, size_t sz)
 		    {
+#if defined(WIN32)
+			return _read(fd, p, sz);
+#else
 			return read(fd, p, sz);
+#endif
 		    });
 
 		if (bs.size() == 0)

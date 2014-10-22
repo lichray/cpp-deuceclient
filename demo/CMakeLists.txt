@@ -5,6 +5,12 @@ find_package(deuceclient REQUIRED)
 
 if(NOT MSVC)
 	set(CMAKE_CXX_FLAGS "-Wall -std=c++0x")
+else()
+	foreach(flagvar CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
+	    CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
+		string(REGEX REPLACE "/MD" "/MT" ${flagvar} "${${flagvar}}")
+		string(REGEX REPLACE "/MDd" "/MTd" ${flagvar} "${${flagvar}}")
+	endforeach()
 endif()
 
 include_directories(${deuceclient_INCLUDE_DIRS})
