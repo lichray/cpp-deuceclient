@@ -46,9 +46,8 @@ auto client::assign_blocks(stdex::string_view vaultname,
 	auto hdrs = common_hdrs_;
 	hdrs.add("Content-Type", "application/json");
 
-	// XXX should use PATCH
-	auto resp = httpverbs::post(url_for_file(vaultname, fileid),
-	    std::move(hdrs), data_from(ba.text()));
+	auto resp = httpverbs::post(url_for_file(vaultname, fileid) +
+	    "/blocks", std::move(hdrs), data_from(ba.text()));
 
 	expecting_server_response(200, resp);
 	ba.clear();
@@ -63,9 +62,6 @@ void client::finalize_file(stdex::string_view vaultname,
 	char buf[22];
 	*rapidjson::internal::i64toa(len, buf) = '\0';
 	hdrs.add("X-File-Length", buf);
-
-	// XXX should not require
-	hdrs.add("Content-Length", "0");
 
 	auto resp = httpverbs::post(url_for_file(vaultname, fileid),
 	    std::move(hdrs));
