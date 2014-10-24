@@ -1,20 +1,9 @@
 #include <deuceclient/deuceclient.h>
 #include <httpverbs/c_file.h>
 
-#include <cstdlib>
-#include <iostream>
 #include <cstdio>
 
-#include "defer.h"
-
-#if !(defined(_MSC_VER) && _MSC_VER < 1700)
-#define THROW_ERRNO() throw std::system_error(errno, std::system_category())
-#else
-#define THROW_ERRNO() do {						\
-	std::error_code ec(errno, std::system_category());		\
-	throw std::system_error(ec, ec.message());			\
-} while(0)
-#endif
+#include "demo_helpers.h"
 
 using namespace rax;
 using namespace httpverbs::keywords;
@@ -61,8 +50,8 @@ void restore_file(char const* fileid)
 	defer(remove(fileid)) namely(delete_temp);
 	defer(fclose(fp));
 
-	auto client = deuceclient::client("http://localhost:8080",
-	    "demo_project");
+	auto client = deuceclient::client(getenv_or("DEUCE_HOST",
+	    "http://localhost:8080"), "demo_project");
 	auto vault = client.get_vault("demo");
 
 	vault.download_file(fileid, to_c_file(fp));
