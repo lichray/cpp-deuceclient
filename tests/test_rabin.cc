@@ -16,10 +16,10 @@ TEST_CASE("split random data with rabin boundary", "[deuce]")
 	    "sample_project_id");
 	auto vault = client.create_vault("GGO");
 
-	deuceclient::managed_bundle<rabin_boundary> bs;
+	deuceclient::managed_bundle<rabin_boundary> bs(1024 * 1024);
 	deuceclient::block_arrangement ba;
 
-	int target_file_size = (10 * 1024 - 100) * 1024;
+	int target_file_size = (2 * 1024 - 100) * 1024;
 	randomstream src(target_file_size);
 
 	bs.boundary().set_limits(14843, 17432, 90406);

@@ -42,6 +42,7 @@ private:
 
 public:
 	bundle();
+	explicit bundle(size_t cap);
 
 #if defined(_MSC_VER) && _MSC_VER < 1900
 	bundle(bundle&& other);
@@ -50,7 +51,7 @@ public:
 
 	bool empty() const;
 	size_t size() const;
-	size_t max_size() const;
+	size_t capacity() const;
 
 	void clear();
 
@@ -74,6 +75,7 @@ private:
 	static size_t packed_size_of_block_map_header();
 	static size_t packed_size_of_block_info();
 
+	size_t cap_;
 	std::unique_ptr<char[]> buf_;
 	std::vector<block_info> pos_;
 };
@@ -83,7 +85,7 @@ struct unmanaged_bundle : bundle
 	template <typename StringLike>
 	void add_block(StringLike const& data)
 	{
-		BOOST_ASSERT_MSG((max_size() - size()) >= data.size(),
+		BOOST_ASSERT_MSG((capacity() - size()) >= data.size(),
 		    "bundle size overflow");
 
 #if !defined(_MSC_VER)
@@ -99,7 +101,8 @@ struct unmanaged_bundle : bundle
 template <typename Algorithm>
 struct managed_bundle : bundle
 {
-	managed_bundle() :
+	explicit managed_bundle(size_t cap) :
+		bundle(cap),
 		pptr_(pbase()),
 		epptr_(pbase()),
 		needs_reset_(false)
@@ -164,7 +167,7 @@ struct managed_bundle : bundle
 private:
 	size_t unused_blen() const
 	{
-		return max_size() - (epptr_ - gbase());
+		return capacity() - (epptr_ - gbase());
 	}
 
 	bool buffer_is_full() const
@@ -206,13 +209,22 @@ private:
 };
 
 inline
-bundle::bundle() : buf_(new char[max_size()])
+bundle::bundle() :
+	cap_(5 * 1024 * 1024),
+	buf_(new char[capacity()])
+{}
+
+inline
+bundle::bundle(size_t cap) :
+	cap_(cap),
+	buf_(new char[capacity()])
 {}
 
 #if defined(_MSC_VER) && _MSC_VER < 1900
 
 inline
 bundle::bundle(bundle&& other) :
+	cap_(std::move(other.cap_)),
 	buf_(std::move(other.buf_)),
 	pos_(std::move(other.pos_))
 {}
@@ -220,6 +232,7 @@ bundle::bundle(bundle&& other) :
 inline
 bundle& bundle::operator=(bundle&& other)
 {
+	cap_ = std::move(other.cap_);
 	buf_ = std::move(other.buf_);
 	pos_ = std::move(other.pos_);
 
@@ -241,9 +254,9 @@ size_t bundle::size() const
 }
 
 inline
-size_t bundle::max_size() const
+size_t bundle::capacity() const
 {
-	return 5 * 1024 * 1024;
+	return cap_;
 }
 
 inline

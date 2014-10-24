@@ -70,7 +70,7 @@ std::string backup_file(char const* filename)
 	    "demo_project");
 	auto vault = client.create_vault("demo");
 
-	deuceclient::managed_bundle<rabin_boundary> bs;
+	deuceclient::managed_bundle<rabin_boundary> bs(15 * 1024 * 1024);
 	deuceclient::bundle bn;
 	deuceclient::block_arrangement ba;
 
@@ -116,7 +116,7 @@ std::string backup_file(char const* filename)
 
 				// keep the request body under 10MB
 				if (bs.size_of_block(it) >
-				    bn.max_size() - bn.size() or
+				    bn.capacity() - bn.size() or
 				    bs.serialized_size_of_block(it) >
 				    10 * 1024 * 1024 - bn.serialized_size())
 					vault.upload_bundle(bn);
