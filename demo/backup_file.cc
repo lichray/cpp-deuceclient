@@ -98,7 +98,6 @@ std::string backup_file(char const* filename)
 			break;
 
 		int64_t offset = file_size;
-		size_t nblocks = 0;
 		auto it = bs.blocks().begin();
 
 		auto send_to_dedup = [&]()
@@ -132,20 +131,10 @@ std::string backup_file(char const* filename)
 			std::tie(end_of_block, blockid) = t;
 
 			ba.add(blockid, offset);
-			++nblocks;
 			offset = file_size + end_of_block;
-
-			// keep the payload under 64KB
-			if (nblocks == 1000)
-			{
-				send_to_dedup();
-				nblocks = 0;
-			}
 		}
 
-		if (nblocks > 0)
-			send_to_dedup();
-
+		send_to_dedup();
 		file_size += bs.size();
 		bs.clear();
 
