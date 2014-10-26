@@ -36,6 +36,57 @@ int main(int argc, char* argv[])
 	}
 }
 
+template <typename Upload>
+struct bundle_uploader
+{
+	explicit bundle_uploader(Upload f) : upload_(std::move(f))
+	{}
+
+	template <typename Range>
+	void copy_missing_blocks_from(Range const& ids,
+	    deuceclient::bundle const& bs)
+	{
+		auto it = bs.blocks().begin();
+		auto ed = bs.blocks().end();
+
+		BOOST_FOREACH(auto&& id, ids)
+		{
+			it = std::find_if(it, ed,
+			    [&](decltype(*it) binfo)
+			    {
+				return std::get<1>(binfo) == id;
+			    });
+
+			if (it == ed)
+				break;
+
+			if (not suites_for_block(it, bs))
+				upload_(bn_);
+
+			bs.copy_block(it, bn_);
+		}
+	}
+
+	void join()
+	{
+		if (bn_.size() > 0)
+			upload_(bn_);
+	}
+
+private:
+	template <typename Iter>
+	bool suites_for_block(Iter it, deuceclient::bundle const& bs) const
+	{
+		return bs.size_of_block(it) <=
+		    bn_.capacity() - bn_.size() and
+		    bs.serialized_size_of_block(it) <=
+		    10 * 1024 * 1024 - bn_.serialized_size();
+	}
+
+	deuceclient::bundle bn_;
+	Upload upload_;
+};
+
 std::string backup_file(char const* filename)
 {
 #if defined(WIN32)
@@ -58,9 +109,14 @@ std::string backup_file(char const* filename)
 	    "http://localhost:8080"), "demo_project");
 	auto vault = client.create_vault("demo");
 
+	auto fupload = [&](deuceclient::bundle& bn)
+	    {
+		vault.upload_bundle(bn);
+	    };
+
 	deuceclient::managed_bundle<rabin_boundary> bs(15 * 1024 * 1024);
-	deuceclient::bundle bn;
 	deuceclient::block_arrangement ba;
+	bundle_uploader<decltype(fupload)> bu(fupload);
 
 	bs.boundary().set_limits(14843, 17432, 90406);
 
@@ -86,31 +142,6 @@ std::string backup_file(char const* filename)
 			break;
 
 		int64_t offset = file_size;
-		auto it = bs.blocks().begin();
-
-		auto send_to_dedup = [&]()
-		    {
-			BOOST_FOREACH(auto&& id, f.assign_blocks(ba))
-			{
-				it = std::find_if(it, bs.blocks().end(),
-				    [&](decltype(*it) binfo)
-				    {
-					return std::get<1>(binfo) == id;
-				    });
-
-				if (it == bs.blocks().end())
-					break;
-
-				// keep the request body under 10MB
-				if (bs.size_of_block(it) >
-				    bn.capacity() - bn.size() or
-				    bs.serialized_size_of_block(it) >
-				    10 * 1024 * 1024 - bn.serialized_size())
-					vault.upload_bundle(bn);
-
-				bs.copy_block(it, bn);
-			}
-		    };
 
 		BOOST_FOREACH(auto&& t, bs.blocks())
 		{
@@ -122,14 +153,13 @@ std::string backup_file(char const* filename)
 			offset = file_size + end_of_block;
 		}
 
-		send_to_dedup();
+		bu.copy_missing_blocks_from(f.assign_blocks(ba), bs);
 		file_size += bs.size();
 		bs.clear();
 
 	} while (bundle_is_full);
 
-	if (bn.size() > 0)
-		vault.upload_bundle(bn);
+	bu.join();
 
 	f.finalize_file(file_size);
 	delete_file.dismiss();
