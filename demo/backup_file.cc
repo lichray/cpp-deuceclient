@@ -12,6 +12,15 @@
 
 #include "demo_helpers.h"
 
+#include <thread>
+#include <mutex>
+#include <condition_variable>
+
+using std::thread;
+using std::unique_lock;
+using std::mutex;
+using std::condition_variable;
+
 using namespace rax;
 
 std::string backup_file(char const* filename);
@@ -39,8 +48,14 @@ int main(int argc, char* argv[])
 template <typename Upload>
 struct bundle_uploader
 {
-	explicit bundle_uploader(Upload f) : upload_(std::move(f))
-	{}
+	explicit bundle_uploader(Upload f) :
+		q_(1),
+		i_(0),
+		upload_(std::move(f)),
+		t_(&bundle_uploader::worker, this)
+	{
+		t_.detach();
+	}
 
 	template <typename Range>
 	void copy_missing_blocks_from(Range const& ids,
@@ -48,6 +63,9 @@ struct bundle_uploader
 	{
 		auto it = bs.blocks().begin();
 		auto ed = bs.blocks().end();
+
+		unique_lock<mutex> lock(m_);
+		not_uploading_.wait(lock, [&]{ return i_ == 0; });
 
 		BOOST_FOREACH(auto&& id, ids)
 		{
@@ -61,16 +79,26 @@ struct bundle_uploader
 				break;
 
 			if (not suites_for_block(it, bs))
-				upload_(bn_);
+			{
+				++i_;
+				if (i_ == q_.size())
+					q_.emplace_back(5 * 1024 * 1024);
+			}
 
-			bs.copy_block(it, bn_);
+			bs.copy_block(it, q_[i_]);
 		}
+
+		if (i_ > 0)
+			not_empty_.notify_one();
 	}
 
 	void join()
 	{
-		if (bn_.size() > 0)
-			upload_(bn_);
+		unique_lock<mutex> lock(m_);
+		not_uploading_.wait(lock, [&]{ return i_ == 0; });
+
+		if (q_[i_].size() > 0)
+			upload_(q_[i_]);
 	}
 
 private:
@@ -78,13 +106,34 @@ private:
 	bool suites_for_block(Iter it, deuceclient::bundle const& bs) const
 	{
 		return bs.size_of_block(it) <=
-		    bn_.capacity() - bn_.size() and
+		    q_[i_].capacity() - q_[i_].size() and
 		    bs.serialized_size_of_block(it) <=
-		    10 * 1024 * 1024 - bn_.serialized_size();
+		    10 * 1024 * 1024 - q_[i_].serialized_size();
 	}
 
-	deuceclient::bundle bn_;
+	void worker()
+	{
+		while (1)
+		{
+			unique_lock<mutex> lock(m_);
+			not_empty_.wait(lock, [&]{ return i_ > 0; });
+
+			std::for_each(begin(q_), begin(q_) + i_, upload_);
+
+			std::swap(q_[0], q_[i_]);
+			i_ = 0;
+
+			not_uploading_.notify_one();
+		}
+	}
+
+	std::vector<deuceclient::bundle> q_;
+	size_t i_;
 	Upload upload_;
+	thread t_;
+	mutex m_;
+	condition_variable not_empty_;
+	condition_variable not_uploading_;
 };
 
 std::string backup_file(char const* filename)
