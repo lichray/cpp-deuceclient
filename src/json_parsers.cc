@@ -73,7 +73,7 @@ auto make_string_list_handler(F f) -> string_list_handler<F>
 	return string_list_handler<F>(std::move(f));
 }
 
-auto parse_list_of_sha1(stdex::string_view src) -> std::vector<sha1_digest>
+auto parse_list_of_sha1(std::string&& src) -> std::vector<sha1_digest>
 {
 	std::vector<sha1_digest> v;
 
@@ -88,10 +88,10 @@ auto parse_list_of_sha1(stdex::string_view src) -> std::vector<sha1_digest>
 		    stdex::string_view(p, sz)));
 	    });
 
-	StringStream ss(src.data());
+	InsituStringStream ss(&*src.begin());
 	Reader reader;
 
-	if (reader.Parse(ss, h))
+	if (reader.Parse<kParseInsituFlag | kParseStopWhenDoneFlag>(ss, h))
 		return v;
 	else
 		throw std::invalid_argument(GetParseError_En(

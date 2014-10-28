@@ -52,7 +52,7 @@ auto client::assign_blocks(stdex::string_view vaultname,
 	expecting_server_response(200, resp);
 	ba.clear();
 
-	return parse_list_of_sha1(resp.content);
+	return parse_list_of_sha1(std::move(resp.content));
 }
 
 void client::finalize_file(stdex::string_view vaultname,

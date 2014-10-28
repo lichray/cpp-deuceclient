@@ -24,7 +24,15 @@ namespace rax
 namespace deuceclient
 {
 
-auto parse_list_of_sha1(stdex::string_view src) -> std::vector<sha1_digest>;
+auto parse_list_of_sha1(std::string&& src) -> std::vector<sha1_digest>;
+
+#if defined(_MSC_VER) && _MSC_VER < 1700
+inline
+auto parse_list_of_sha1(char const* src) -> std::vector<sha1_digest>
+{
+	return parse_list_of_sha1(std::string(src));
+}
+#endif
 
 }
 }
