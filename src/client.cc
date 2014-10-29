@@ -29,7 +29,7 @@ void client::do_download(std::string&& url, callback&& f)
 	httpverbs::request req("GET", std::move(url));
 	req.headers = common_hdrs_;
 
-	auto resp = req.perform(std::move(f));
+	auto resp = req.allow_redirects().perform(std::move(f));
 
 	expecting_server_response(200, resp);
 }
