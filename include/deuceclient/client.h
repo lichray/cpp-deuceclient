@@ -55,11 +55,11 @@ struct client
 	    stdex::string_view fileid, int64_t len);
 
 private:
-	std::string url_for_vault(stdex::string_view name);
+	std::string url_for_vault(stdex::string_view name) const;
 	std::string url_for_block(stdex::string_view vaultname,
-	    sha1_digest blockid);
+	    sha1_digest blockid) const;
 	std::string url_for_file(stdex::string_view vaultname,
-	    stdex::string_view fileid);
+	    stdex::string_view fileid) const;
 
 	void do_download(std::string&& url, callback&&);
 	void do_delete(std::string&& url);
@@ -76,7 +76,7 @@ client::client(std::string host, std::string project_id) :
 }
 
 inline
-std::string client::url_for_vault(stdex::string_view name)
+std::string client::url_for_vault(stdex::string_view name) const
 {
 	auto s = prefix_;
 	s.append(name.data(), name.size());
@@ -86,7 +86,7 @@ std::string client::url_for_vault(stdex::string_view name)
 
 inline
 std::string client::url_for_block(stdex::string_view vaultname,
-    sha1_digest blockid)
+    sha1_digest blockid) const
 {
 	auto s = url_for_vault(vaultname);
 	auto sz = s.size();
@@ -100,7 +100,7 @@ std::string client::url_for_block(stdex::string_view vaultname,
 
 inline
 std::string client::url_for_file(stdex::string_view vaultname,
-    stdex::string_view fileid)
+    stdex::string_view fileid) const
 {
 	auto s = url_for_vault(vaultname);
 	auto sz = s.size();

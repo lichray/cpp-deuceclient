@@ -41,7 +41,7 @@ struct vault
 	void download_file(stdex::string_view fileid, callback);
 	void delete_file(stdex::string_view fileid);
 
-	file get_file(stdex::string_view fileid);
+	file get_file(stdex::string_view fileid) const;
 
 	friend inline
 	bool operator==(vault const& a, vault const& b)
@@ -62,7 +62,7 @@ private:
 };
 
 inline
-file vault::get_file(stdex::string_view fileid)
+file vault::get_file(stdex::string_view fileid) const
 {
 	return file(vaultname_, fileid.to_string(), client_);
 }
