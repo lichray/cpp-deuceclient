@@ -79,7 +79,7 @@ TEST_CASE("SHA1")
 	}
 }
 
-TEST_CASE("SHA2")
+TEST_CASE("others")
 {
 	SECTION("SHA256 zero-length string")
 	{
@@ -92,5 +92,11 @@ TEST_CASE("SHA2")
 		REQUIRE(hashlib::sha512("").hexdigest() == "cf83e1357eefb8bdf1"
 		    "542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d8"
 		    "5f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e");
+	}
+
+	SECTION("MD5 zero-length string")
+	{
+		REQUIRE(hashlib::md5("").hexdigest() == "d41d8cd98f00b204e9800"
+		    "998ecf8427e");
 	}
 }

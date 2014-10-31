@@ -18,6 +18,7 @@
 #define _HASHLIB_H
 
 #include <openssl/sha.h>
+#include <openssl/md5.h>
 
 #include <array>
 #include <string>
@@ -37,23 +38,24 @@ struct sha1_provider
 {
 	typedef SHA_CTX context_type;
 	static const size_t digest_size = SHA_DIGEST_LENGTH;
+	static const size_t block_size = SHA_CBLOCK;
 
 	static
-	int init(context_type* ctx)
+	void init(context_type* ctx)
 	{
-		return SHA1_Init(ctx);
+		SHA1_Init(ctx);
 	}
 
 	static
-	int update(context_type* ctx, void const* data, size_t len)
+	void update(context_type* ctx, void const* data, size_t len)
 	{
-		return SHA1_Update(ctx, data, len);
+		SHA1_Update(ctx, data, len);
 	}
 
 	static
-	int final(unsigned char* md, context_type* ctx)
+	void finalize(unsigned char* md, context_type* ctx)
 	{
-		return SHA1_Final(md, ctx);
+		SHA1_Final(md, ctx);
 	}
 };
 
@@ -61,23 +63,24 @@ struct sha256_provider
 {
 	typedef SHA256_CTX context_type;
 	static const size_t digest_size = SHA256_DIGEST_LENGTH;
+	static const size_t block_size = SHA256_CBLOCK;
 
 	static
-	int init(context_type* ctx)
+	void init(context_type* ctx)
 	{
-		return SHA256_Init(ctx);
+		SHA256_Init(ctx);
 	}
 
 	static
-	int update(context_type* ctx, void const* data, size_t len)
+	void update(context_type* ctx, void const* data, size_t len)
 	{
-		return SHA256_Update(ctx, data, len);
+		SHA256_Update(ctx, data, len);
 	}
 
 	static
-	int final(unsigned char* md, context_type* ctx)
+	void finalize(unsigned char* md, context_type* ctx)
 	{
-		return SHA256_Final(md, ctx);
+		SHA256_Final(md, ctx);
 	}
 };
 
@@ -85,23 +88,49 @@ struct sha512_provider
 {
 	typedef SHA512_CTX context_type;
 	static const size_t digest_size = SHA512_DIGEST_LENGTH;
+	static const size_t block_size = SHA512_CBLOCK;
 
 	static
-	int init(context_type* ctx)
+	void init(context_type* ctx)
 	{
-		return SHA512_Init(ctx);
+		SHA512_Init(ctx);
 	}
 
 	static
-	int update(context_type* ctx, void const* data, size_t len)
+	void update(context_type* ctx, void const* data, size_t len)
 	{
-		return SHA512_Update(ctx, data, len);
+		SHA512_Update(ctx, data, len);
 	}
 
 	static
-	int final(unsigned char* md, context_type* ctx)
+	void finalize(unsigned char* md, context_type* ctx)
 	{
-		return SHA512_Final(md, ctx);
+		SHA512_Final(md, ctx);
+	}
+};
+
+struct md5_provider
+{
+	typedef MD5_CTX context_type;
+	static const size_t digest_size = MD5_DIGEST_LENGTH;
+	static const size_t block_size = MD5_CBLOCK;
+
+	static
+	void init(context_type* ctx)
+	{
+		MD5_Init(ctx);
+	}
+
+	static
+	void update(context_type* ctx, void const* data, size_t len)
+	{
+		MD5_Update(ctx, data, len);
+	}
+
+	static
+	void finalize(unsigned char* md, context_type* ctx)
+	{
+		MD5_Final(md, ctx);
 	}
 };
 
@@ -192,8 +221,10 @@ auto unhexlify(stdex::string_view hs) -> std::array<unsigned char, N>
 template <typename HashProvider>
 struct hasher
 {
-	typedef typename HashProvider::context_type	context_type;
 	static const size_t digest_size = HashProvider::digest_size;
+	static const size_t block_size = HashProvider::block_size;
+
+	typedef typename HashProvider::context_type	context_type;
 	typedef std::array<unsigned char, digest_size>	digest_type;
 
 	hasher()
@@ -241,7 +272,7 @@ struct hasher
 		digest_type md;
 		auto tmp_ctx = ctx_;
 
-		HashProvider::final(md.data(), &tmp_ctx);
+		HashProvider::finalize(md.data(), &tmp_ctx);
 
 		return md;
 	}
@@ -269,6 +300,7 @@ bool operator!=(hasher<HashProvider> const& a, hasher<HashProvider> const& b)
 	return !(a == b);
 }
 
+typedef hasher<detail::md5_provider>	md5;
 typedef hasher<detail::sha1_provider>	sha1;
 typedef hasher<detail::sha256_provider>	sha256;
 typedef hasher<detail::sha512_provider>	sha512;
