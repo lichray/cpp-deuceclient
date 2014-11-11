@@ -31,6 +31,8 @@ struct client
 {
 	explicit client(std::string host, std::string project_id);
 
+	void authenticate_with(std::function<std::string()> f);
+
 	vault create_vault(stdex::string_view name);
 	vault get_vault(stdex::string_view name);
 	void delete_vault(stdex::string_view name);
@@ -66,6 +68,7 @@ private:
 
 	std::string prefix_;
 	httpverbs::header_dict common_hdrs_;
+	std::function<std::string()> auth_;
 };
 
 inline
@@ -73,6 +76,13 @@ client::client(std::string host, std::string project_id) :
 	prefix_(std::move(host) + "/v1.0/vaults/")
 {
 	common_hdrs_.add("X-Project-ID", project_id);
+}
+
+inline
+void client::authenticate_with(std::function<std::string()> f)
+{
+	common_hdrs_.set("X-Auth-Token", f());
+	auth_ = std::move(f);
 }
 
 inline
