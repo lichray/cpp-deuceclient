@@ -1,4 +1,3 @@
-#include <deuceclient/deuceclient.h>
 #include <httpverbs/c_file.h>
 
 #include <cstdio>
@@ -50,8 +49,7 @@ void restore_file(char const* fileid)
 	defer(remove(fileid)) namely(delete_temp);
 	defer(fclose(fp));
 
-	auto client = deuceclient::client(getenv_or("DEUCE_HOST",
-	    "http://localhost:8080"), "demo_project");
+	auto client = make_demo_client();
 	auto vault = client.get_vault("demo");
 
 	vault.download_file(fileid, to_c_file(fp));

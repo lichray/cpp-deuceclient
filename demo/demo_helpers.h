@@ -1,3 +1,5 @@
+#include <deuceclient/deuceclient.h>
+
 #include <cstdlib>
 #include <iostream>
 #include <system_error>
@@ -36,4 +38,16 @@ std::string getenv_or(char const* name, char const* fallback)
 
 	return p != nullptr ? p : fallback;
 #endif
+}
+
+inline
+rax::deuceclient::client make_demo_client()
+{
+	auto client = rax::deuceclient::client(
+	    getenv_or("DEUCE_HOST", "http://localhost:8080"),
+	    getenv_or("DEUCE_PROJECT", "demo_project"));
+
+	client.authenticate_with([]{ return getenv_or("DEUCE_TOKEN", ""); });
+
+	return client;
 }

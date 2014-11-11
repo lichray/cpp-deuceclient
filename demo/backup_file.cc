@@ -1,4 +1,3 @@
-#include <deuceclient/deuceclient.h>
 #include <boost/foreach.hpp>
 
 #include <fcntl.h>
@@ -105,8 +104,7 @@ std::string backup_file(char const* filename)
 	defer(close(fd));
 #endif
 
-	auto client = deuceclient::client(getenv_or("DEUCE_HOST",
-	    "http://localhost:8080"), "demo_project");
+	auto client = make_demo_client();
 	auto vault = client.create_vault("demo");
 
 	auto fupload = [&](deuceclient::bundle& bn)
