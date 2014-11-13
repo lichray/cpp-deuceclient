@@ -18,7 +18,6 @@
 #include <rapidjson/internal/itoa.h>
 
 #include <deuceclient/client.h>
-#include <deuceclient/exceptions.h>
 
 #include "json_parsers.h"
 

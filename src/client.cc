@@ -17,7 +17,6 @@
 #include <httpverbs/httpverbs.h>
 
 #include <deuceclient/client.h>
-#include <deuceclient/exceptions.h>
 
 namespace rax
 {

@@ -19,6 +19,7 @@
 
 #include "vault.h"
 #include "file.h"
+#include "exceptions.h"
 
 #include <httpverbs/header_dict.h>
 
@@ -65,6 +66,9 @@ private:
 
 	void do_download(std::string&& url, callback&&);
 	void do_delete(std::string&& url);
+
+	template <typename RespType>
+	void expecting_server_response(int status_code, RespType const& resp);
 
 	std::string prefix_;
 	httpverbs::header_dict common_hdrs_;
@@ -120,6 +124,14 @@ std::string client::url_for_file(stdex::string_view vaultname,
 	    begin(s) + sz) - 1);
 
 	return s;
+}
+
+template <typename RespType>
+inline
+void client::expecting_server_response(int status_code, RespType const& resp)
+{
+	if (resp.status_code != status_code)
+		throw error(resp.status_code);
 }
 
 inline

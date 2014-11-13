@@ -18,7 +18,6 @@
 #define RAX_DEUCECLIENT_DEUCECLIENT_H
 
 #include "client.h"
-#include "exceptions.h"
 #include "rabin_boundary.h"
 
 #endif

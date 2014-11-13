@@ -41,13 +41,6 @@ private:
 	int const status_code_;
 };
 
-template <typename RespType>
-inline void expecting_server_response(int status_code, RespType const& resp)
-{
-	if (resp.status_code != status_code)
-		throw error(resp.status_code);
-}
-
 }
 }
 
