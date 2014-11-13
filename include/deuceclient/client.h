@@ -67,6 +67,7 @@ private:
 	void do_download(std::string&& url, callback&&);
 	void do_delete(std::string&& url);
 	void do_authenticate();
+	static void do_sleep(int seconds);
 
 	template <int Code, typename F>
 	auto get_response(F do_req) -> decltype(do_req());
@@ -131,18 +132,27 @@ template <int Code, typename F>
 inline
 auto client::get_response(F do_req) -> decltype(do_req())
 {
-	auto resp = do_req();
+	int delay[] = { 1, 5, 10, 30 };
 
-	if (resp.status_code == 401 and auth_)
+	for (auto it = std::begin(delay);; ++it)
 	{
-		do_authenticate();
-		resp = do_req();
+		auto resp = do_req();
+
+		if (resp.status_code == 401 and auth_)
+		{
+			do_authenticate();
+			resp = do_req();
+		}
+
+		if (resp.status_code == Code)
+			return resp;
+
+		if ((resp.status_code == 500 or resp.status_code == 503) and
+		    it != std::end(delay))
+			do_sleep(*it);
+		else
+			throw error(resp.status_code);
 	}
-
-	if (resp.status_code != Code)
-		throw error(resp.status_code);
-
-	return resp;
 }
 
 inline

@@ -18,6 +18,17 @@
 
 #include <deuceclient/client.h>
 
+#include "config.h"
+
+#if defined(USE_BOOST_THREAD)
+#include <boost/thread/thread.hpp>
+#else
+#ifndef _GLIBCXX_USE_NANOSLEEP
+#define _GLIBCXX_USE_NANOSLEEP
+#endif
+#include <thread>
+#endif
+
 namespace rax
 {
 namespace deuceclient
@@ -43,6 +54,15 @@ void client::do_delete(std::string&& url)
 void client::do_authenticate()
 {
 	common_hdrs_.set("X-Auth-Token", auth_());
+}
+
+void client::do_sleep(int n)
+{
+#if defined(USE_BOOST_THREAD)
+	boost::this_thread::sleep(boost::posix_time::seconds(n));
+#else
+	std::this_thread::sleep_for(std::chrono::seconds(n));
+#endif
 }
 
 }

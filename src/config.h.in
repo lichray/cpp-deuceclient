@@ -1,0 +1,6 @@
+#ifndef _RAX_DEUCECLIENT_CONFIG_H
+#define _RAX_DEUCECLIENT_CONFIG_H
+
+#cmakedefine USE_BOOST_THREAD
+
+#endif

@@ -2,6 +2,9 @@
 *~
 .*.swp
 
+# generated files
+config.h
+
 # cmake
 build/
 Makefile

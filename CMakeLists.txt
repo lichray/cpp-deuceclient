@@ -3,11 +3,14 @@ project(deuceclient)
 enable_testing()
 
 include(CTest)
+include(CheckIncludeFileCXX)
 include(ExternalProject)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY build)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY build)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY tests)
+
+option(USE_BOOST_THREAD "Use Boost.Thread instead of C++11 <thread>" OFF)
 
 find_package(httpverbs REQUIRED)
 find_package(OpenSSL REQUIRED)
@@ -25,6 +28,23 @@ else()
 		string(REGEX REPLACE "/MDd" "/MTd" ${flagvar} "${${flagvar}}")
 	endforeach()
 endif()
+
+if(USE_BOOST_THREAD)
+	string(FIND "${httpverbs_LINK_LIBRARIES}" boost_thread
+	    HAVE_BOOST_THREAD)
+	if(NOT HAVE_BOOST_THREAD)
+		message(FATAL_ERROR "httpverbs is not built with Boost.
+		    Please rebuild httpverbs.")
+	endif()
+else()
+	CHECK_INCLUDE_FILE_CXX(thread HAVE_THREAD)
+	if(NOT HAVE_THREAD)
+		message(FATAL_ERROR "C++11 <thread> not found.
+		    Change option to use Boost.Thread")
+	endif()
+endif()
+
+configure_file(src/config.h.in ${CMAKE_SOURCE_DIR}/src/config.h)
 
 include_directories(3rdparty/include)
 include_directories(include)
