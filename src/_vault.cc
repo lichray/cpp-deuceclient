@@ -26,7 +26,10 @@ namespace deuceclient
 
 vault client::create_vault(stdex::string_view name)
 {
-	auto resp = httpverbs::put(url_for_vault(name), common_hdrs_);
+	httpverbs::request req("PUT", url_for_vault(name));
+	req.headers = common_hdrs_;
+
+	auto resp = req.perform();
 
 	expecting_server_response(201, resp);
 
@@ -35,7 +38,10 @@ vault client::create_vault(stdex::string_view name)
 
 vault client::get_vault(stdex::string_view name)
 {
-	auto resp = httpverbs::get(url_for_vault(name), common_hdrs_);
+	httpverbs::request req("GET", url_for_vault(name));
+	req.headers = common_hdrs_;
+
+	auto resp = req.allow_redirects().perform();
 
 	expecting_server_response(200, resp);
 

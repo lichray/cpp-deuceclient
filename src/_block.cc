@@ -29,11 +29,11 @@ namespace deuceclient
 void client::upload_block(stdex::string_view vaultname, sha1_digest blockid,
     stdex::string_view data)
 {
-	auto hdrs = common_hdrs_;
-	hdrs.add("Content-Type", "application/octet-stream");
+	httpverbs::request req("PUT", url_for_block(vaultname, blockid));
+	req.headers = common_hdrs_;
+	req.headers.add("Content-Type", "application/octet-stream");
 
-	auto resp = httpverbs::put(url_for_block(vaultname, blockid),
-	    std::move(hdrs), data_from(data));
+	auto resp = req.perform(data_from(data));
 
 	expecting_server_response(201, resp);
 }

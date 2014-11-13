@@ -36,7 +36,10 @@ void client::do_download(std::string&& url, callback&& f)
 
 void client::do_delete(std::string&& url)
 {
-	auto resp = httpverbs::delete_(std::move(url), common_hdrs_);
+	httpverbs::request req("DELETE", std::move(url));
+	req.headers = common_hdrs_;
+
+	auto resp = req.perform();
 
 	expecting_server_response(204, resp);
 }
