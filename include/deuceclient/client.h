@@ -67,8 +67,8 @@ private:
 	void do_download(std::string&& url, callback&&);
 	void do_delete(std::string&& url);
 
-	template <typename RespType>
-	void expecting_server_response(int status_code, RespType const& resp);
+	template <int Code, typename F>
+	auto get_response(F do_req) -> decltype(do_req());
 
 	std::string prefix_;
 	httpverbs::header_dict common_hdrs_;
@@ -126,12 +126,16 @@ std::string client::url_for_file(stdex::string_view vaultname,
 	return s;
 }
 
-template <typename RespType>
+template <int Code, typename F>
 inline
-void client::expecting_server_response(int status_code, RespType const& resp)
+auto client::get_response(F do_req) -> decltype(do_req())
 {
-	if (resp.status_code != status_code)
+	auto resp = do_req();
+
+	if (resp.status_code != Code)
 		throw error(resp.status_code);
+
+	return resp;
 }
 
 inline

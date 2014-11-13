@@ -27,10 +27,9 @@ void client::do_download(std::string&& url, callback&& f)
 {
 	httpverbs::request req("GET", std::move(url));
 	req.headers = common_hdrs_;
+	req.allow_redirects();
 
-	auto resp = req.allow_redirects().perform(std::move(f));
-
-	expecting_server_response(200, resp);
+	get_response<200>([&] { return req.perform(f); });
 }
 
 void client::do_delete(std::string&& url)
@@ -38,9 +37,7 @@ void client::do_delete(std::string&& url)
 	httpverbs::request req("DELETE", std::move(url));
 	req.headers = common_hdrs_;
 
-	auto resp = req.perform();
-
-	expecting_server_response(204, resp);
+	get_response<204>([&] { return req.perform(); });
 }
 
 }

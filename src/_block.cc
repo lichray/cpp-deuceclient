@@ -32,9 +32,7 @@ void client::upload_block(stdex::string_view vaultname, sha1_digest blockid,
 	req.headers = common_hdrs_;
 	req.headers.add("Content-Type", "application/octet-stream");
 
-	auto resp = req.perform(data_from(data));
-
-	expecting_server_response(201, resp);
+	get_response<201>([&] { return req.perform(data_from(data)); });
 }
 
 void client::upload_bundle(stdex::string_view vaultname, bundle& bs)
@@ -43,9 +41,11 @@ void client::upload_bundle(stdex::string_view vaultname, bundle& bs)
 	req.headers = common_hdrs_;
 	req.headers.add("Content-Type", "application/msgpack");
 
-	auto resp = req.perform(bs.serialized_size(), bs.get_serializer());
+	get_response<201>([&]
+	    {
+		return req.perform(bs.serialized_size(), bs.get_serializer());
+	    });
 
-	expecting_server_response(201, resp);
 	bs.clear();
 }
 

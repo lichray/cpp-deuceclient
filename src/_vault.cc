@@ -28,9 +28,7 @@ vault client::create_vault(stdex::string_view name)
 	httpverbs::request req("PUT", url_for_vault(name));
 	req.headers = common_hdrs_;
 
-	auto resp = req.perform();
-
-	expecting_server_response(201, resp);
+	get_response<201>([&] { return req.perform(); });
 
 	return vault(name.to_string(), *this);
 }
@@ -39,10 +37,9 @@ vault client::get_vault(stdex::string_view name)
 {
 	httpverbs::request req("GET", url_for_vault(name));
 	req.headers = common_hdrs_;
+	req.allow_redirects();
 
-	auto resp = req.allow_redirects().perform();
-
-	expecting_server_response(200, resp);
+	get_response<200>([&] { return req.perform(); });
 
 	return vault(name.to_string(), *this);
 }

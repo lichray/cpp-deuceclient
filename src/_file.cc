@@ -33,9 +33,7 @@ file client::make_file(stdex::string_view vaultname)
 	httpverbs::request req("POST", url_for_vault(vaultname) + "/files");
 	req.headers = common_hdrs_;
 
-	auto resp = req.perform();
-
-	expecting_server_response(201, resp);
+	auto resp = get_response<201>([&] { return req.perform(); });
 
 	return file(vaultname.to_string(), resp.headers["x-file-id"], *this);
 }
@@ -49,9 +47,11 @@ auto client::assign_blocks(stdex::string_view vaultname,
 	req.headers = common_hdrs_;
 	req.headers.add("Content-Type", "application/json");
 
-	auto resp = req.perform(data_from(ba.text()));
+	auto resp = get_response<200>([&]
+	    {
+		return req.perform(data_from(ba.text()));
+	    });
 
-	expecting_server_response(200, resp);
 	ba.clear();
 
 	return parse_list_of_sha1(std::move(resp.content));
@@ -67,9 +67,7 @@ void client::finalize_file(stdex::string_view vaultname,
 	*rapidjson::internal::i64toa(len, buf) = '\0';
 	req.headers.add("X-File-Length", buf);
 
-	auto resp = req.perform();
-
-	expecting_server_response(200, resp);
+	get_response<200>([&] { return req.perform(); });
 }
 
 }
