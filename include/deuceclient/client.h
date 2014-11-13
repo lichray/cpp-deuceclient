@@ -66,6 +66,7 @@ private:
 
 	void do_download(std::string&& url, callback&&);
 	void do_delete(std::string&& url);
+	void do_authenticate();
 
 	template <int Code, typename F>
 	auto get_response(F do_req) -> decltype(do_req());
@@ -85,8 +86,8 @@ client::client(std::string host, std::string project_id) :
 inline
 void client::authenticate_with(std::function<std::string()> f)
 {
-	common_hdrs_.set("X-Auth-Token", f());
 	auth_ = std::move(f);
+	do_authenticate();
 }
 
 inline
@@ -131,6 +132,12 @@ inline
 auto client::get_response(F do_req) -> decltype(do_req())
 {
 	auto resp = do_req();
+
+	if (resp.status_code == 401 and auth_)
+	{
+		do_authenticate();
+		resp = do_req();
+	}
 
 	if (resp.status_code != Code)
 		throw error(resp.status_code);

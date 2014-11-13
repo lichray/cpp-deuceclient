@@ -40,5 +40,10 @@ void client::do_delete(std::string&& url)
 	get_response<204>([&] { return req.perform(); });
 }
 
+void client::do_authenticate()
+{
+	common_hdrs_.set("X-Auth-Token", auth_());
+}
+
 }
 }
