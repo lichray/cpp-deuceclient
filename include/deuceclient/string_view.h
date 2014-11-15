@@ -33,6 +33,7 @@
 #include <type_traits>
 #include <functional>
 #include <stdexcept>
+#include <iosfwd>
 
 #if defined(_MSC_VER)
 #include <ciso646>
@@ -50,9 +51,7 @@ namespace detail {
 template <typename Container>
 struct iter
 {
-#if defined(_LIBCPP_VERSION) && 0
-	typedef std::__wrap_iter<typename Container::const_pointer> type;
-#elif defined(__GLIBCXX__)
+#if defined(__GLIBCXX__)
 	typedef __gnu_cxx::__normal_iterator
 	    <typename Container::const_pointer, Container> type;
 #else
@@ -190,20 +189,12 @@ struct basic_string_view
 
 	void remove_prefix(size_type n)
 	{
-		if (n > size())
-			throw std::out_of_range(
-			    "basic_string_view::remove_prefix");
-
 		it_ += n;
 		sz_ -= n;
 	}
 
 	void remove_suffix(size_type n)
 	{
-		if (n > size())
-			throw std::out_of_range(
-			    "basic_string_view::remove_suffix");
-
 		sz_ -= n;
 	}
 
@@ -405,6 +396,85 @@ void swap(basic_string_view<CharT, Traits>& a,
     basic_string_view<CharT, Traits>& b) noexcept
 {
 	a.swap(b);
+}
+
+template <typename CharT, typename Traits>
+inline
+auto operator<<(std::basic_ostream<CharT, Traits>& out,
+    basic_string_view<CharT, Traits> s) -> decltype(out)
+{
+#if defined(__GLIBCXX__)
+	return __ostream_insert(out, s.data(), s.size());
+#else
+	typedef std::basic_ostream<CharT, Traits> ostream_type;
+
+	typename ostream_type::sentry ok(out);
+
+	if (not ok)
+		return out;
+
+	try
+	{
+		decltype(out.width()) w = 0;
+		decltype(out.width()) n = s.size();
+
+		if (out.width() > n)
+		{
+			w = out.width() - n;
+
+			if ((out.flags() & ostream_type::adjustfield) !=
+			    ostream_type::left)
+				w = -w;
+		}
+
+		if (w == 0)
+		{
+			if (out.rdbuf()->sputn(s.data(), n) != n)
+			{
+				out.setstate(ostream_type::badbit);
+				return out;
+			}
+		}
+		else
+		{
+			auto c = out.fill();
+
+			for (; w < 0; ++w)
+			{
+				if (Traits::eq_int_type(out.rdbuf()->sputc(c),
+				    Traits::eof()))
+				{
+					out.setstate(ostream_type::badbit);
+					return out;
+				}
+			}
+
+			if (out.rdbuf()->sputn(s.data(), n) != n)
+			{
+				out.setstate(ostream_type::badbit);
+				return out;
+			}
+
+			for (; w > 0; --w)
+			{
+				if (Traits::eq_int_type(out.rdbuf()->sputc(c),
+				    Traits::eof()))
+				{
+					out.setstate(ostream_type::badbit);
+					return out;
+				}
+			}
+		}
+
+		out.width(0);
+		return out;
+	}
+	catch (...)
+	{
+		out.setstate(ostream_type::badbit);
+		return out;
+	}
+#endif
 }
 
 typedef basic_string_view<char>		string_view;
