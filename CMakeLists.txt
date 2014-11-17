@@ -30,12 +30,7 @@ else()
 endif()
 
 if(USE_BOOST_THREAD)
-	string(FIND "${httpverbs_LINK_LIBRARIES}" boost_thread
-	    HAVE_BOOST_THREAD)
-	if(NOT HAVE_BOOST_THREAD)
-		message(FATAL_ERROR "httpverbs is not built with Boost.
-		    Please rebuild httpverbs.")
-	endif()
+	find_package(Boost 1.48.0 COMPONENTS thread date_time REQUIRED)
 else()
 	CHECK_INCLUDE_FILE_CXX(thread HAVE_THREAD)
 	if(NOT HAVE_THREAD)
@@ -60,6 +55,11 @@ target_include_directories(deuceclient PUBLIC ${OPENSSL_INCLUDE_DIR})
 target_link_libraries(deuceclient $<TARGET_PROPERTY:httpverbs,LOCATION>
     ${httpverbs_LINK_LIBRARIES})
 target_link_libraries(deuceclient ${OPENSSL_CRYPTO_LIBRARIES})
+
+if(USE_BOOST_THREAD)
+	target_include_directories(deuceclient PRIVATE ${Boost_INCLUDE_DIRS})
+	target_link_libraries(deuceclient ${Boost_LIBRARIES})
+endif()
 
 if(BUILD_TESTING)
 	foreach(test_src ${tests_srcs})

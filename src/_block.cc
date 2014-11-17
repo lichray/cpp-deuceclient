@@ -30,7 +30,7 @@ void client::upload_block(stdex::string_view vaultname, sha1_digest blockid,
 {
 	httpverbs::request req("PUT", url_for_block(vaultname, blockid));
 
-	get_response<201>([&]
+	get_response<201>([&]() -> httpverbs::response
 	    {
 		req.headers = common_hdrs_;
 		req.headers.add("Content-Type", "application/octet-stream");
@@ -43,7 +43,7 @@ void client::upload_bundle(stdex::string_view vaultname, bundle& bs)
 {
 	httpverbs::request req("POST", url_for_vault(vaultname) + "/blocks");
 
-	get_response<201>([&]
+	get_response<201>([&]() -> httpverbs::response
 	    {
 		req.headers = common_hdrs_;
 		req.headers.add("Content-Type", "application/msgpack");

@@ -32,7 +32,7 @@ file client::make_file(stdex::string_view vaultname)
 {
 	httpverbs::request req("POST", url_for_vault(vaultname) + "/files");
 
-	auto resp = get_response<201>([&]
+	auto resp = get_response<201>([&]() -> httpverbs::response
 	    {
 		req.headers = common_hdrs_;
 		return req.perform();
@@ -48,7 +48,7 @@ auto client::assign_blocks(stdex::string_view vaultname,
 	httpverbs::request req("POST", url_for_file(vaultname, fileid) +
 	    "/blocks");
 
-	auto resp = get_response<200>([&]
+	auto resp = get_response<200>([&]() -> httpverbs::response
 	    {
 		req.headers = common_hdrs_;
 		req.headers.add("Content-Type", "application/json");
@@ -69,7 +69,7 @@ void client::finalize_file(stdex::string_view vaultname,
 	char buf[22];
 	*rapidjson::internal::i64toa(len, buf) = '\0';
 
-	get_response<200>([&]
+	get_response<200>([&]() -> httpverbs::response
 	    {
 		req.headers = common_hdrs_;
 		req.headers.add("X-File-Length", buf);
