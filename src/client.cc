@@ -37,18 +37,24 @@ namespace deuceclient
 void client::do_download(std::string&& url, callback&& f)
 {
 	httpverbs::request req("GET", std::move(url));
-	req.headers = common_hdrs_;
 	req.allow_redirects();
 
-	get_response<200>([&] { return req.perform(f); });
+	get_response<200>([&]
+	    {
+		req.headers = common_hdrs_;
+		return req.perform(f);
+	    });
 }
 
 void client::do_delete(std::string&& url)
 {
 	httpverbs::request req("DELETE", std::move(url));
-	req.headers = common_hdrs_;
 
-	get_response<204>([&] { return req.perform(); });
+	get_response<204>([&]
+	    {
+		req.headers = common_hdrs_;
+		return req.perform();
+	    });
 }
 
 void client::do_authenticate()

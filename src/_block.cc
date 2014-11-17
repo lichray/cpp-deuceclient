@@ -29,20 +29,25 @@ void client::upload_block(stdex::string_view vaultname, sha1_digest blockid,
     stdex::string_view data)
 {
 	httpverbs::request req("PUT", url_for_block(vaultname, blockid));
-	req.headers = common_hdrs_;
-	req.headers.add("Content-Type", "application/octet-stream");
 
-	get_response<201>([&] { return req.perform(data_from(data)); });
+	get_response<201>([&]
+	    {
+		req.headers = common_hdrs_;
+		req.headers.add("Content-Type", "application/octet-stream");
+
+		return req.perform(data_from(data));
+	    });
 }
 
 void client::upload_bundle(stdex::string_view vaultname, bundle& bs)
 {
 	httpverbs::request req("POST", url_for_vault(vaultname) + "/blocks");
-	req.headers = common_hdrs_;
-	req.headers.add("Content-Type", "application/msgpack");
 
 	get_response<201>([&]
 	    {
+		req.headers = common_hdrs_;
+		req.headers.add("Content-Type", "application/msgpack");
+
 		return req.perform(bs.serialized_size(), bs.get_serializer());
 	    });
 

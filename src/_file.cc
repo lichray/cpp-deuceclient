@@ -31,9 +31,12 @@ namespace deuceclient
 file client::make_file(stdex::string_view vaultname)
 {
 	httpverbs::request req("POST", url_for_vault(vaultname) + "/files");
-	req.headers = common_hdrs_;
 
-	auto resp = get_response<201>([&] { return req.perform(); });
+	auto resp = get_response<201>([&]
+	    {
+		req.headers = common_hdrs_;
+		return req.perform();
+	    });
 
 	return file(vaultname.to_string(), resp.headers["x-file-id"], *this);
 }
@@ -44,11 +47,12 @@ auto client::assign_blocks(stdex::string_view vaultname,
 {
 	httpverbs::request req("POST", url_for_file(vaultname, fileid) +
 	    "/blocks");
-	req.headers = common_hdrs_;
-	req.headers.add("Content-Type", "application/json");
 
 	auto resp = get_response<200>([&]
 	    {
+		req.headers = common_hdrs_;
+		req.headers.add("Content-Type", "application/json");
+
 		return req.perform(data_from(ba.text()));
 	    });
 
@@ -61,13 +65,17 @@ void client::finalize_file(stdex::string_view vaultname,
     stdex::string_view fileid, int64_t len)
 {
 	httpverbs::request req("POST", url_for_file(vaultname, fileid));
-	req.headers = common_hdrs_;
 
 	char buf[22];
 	*rapidjson::internal::i64toa(len, buf) = '\0';
-	req.headers.add("X-File-Length", buf);
 
-	get_response<200>([&] { return req.perform(); });
+	get_response<200>([&]
+	    {
+		req.headers = common_hdrs_;
+		req.headers.add("X-File-Length", buf);
+
+		return req.perform();
+	    });
 }
 
 }
