@@ -77,6 +77,17 @@ TEST_CASE("SHA1")
 
 		REQUIRE(hobj1.hexdigest() == hobj.hexdigest());
 	}
+
+	SECTION("stream output")
+	{
+		std::stringstream s;
+		hashlib::sha1 h;
+
+		using namespace std;
+		s << left << setw(42) << setfill('_') << h;
+
+		REQUIRE(s.str() == h.hexdigest() + "__");
+	}
 }
 
 TEST_CASE("others")

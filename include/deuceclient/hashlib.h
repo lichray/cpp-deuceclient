@@ -26,6 +26,7 @@
 #include <iterator>
 #include <cstring>
 #include <stdexcept>
+#include <iosfwd>
 #include "string_view.h"
 
 namespace hashlib
@@ -298,6 +299,19 @@ inline
 bool operator!=(hasher<HashProvider> const& a, hasher<HashProvider> const& b)
 {
 	return !(a == b);
+}
+
+template <typename CharT, typename Traits, typename HashProvider>
+inline
+auto operator<<(std::basic_ostream<CharT, Traits>& out,
+    hasher<HashProvider> const& h) -> decltype(out)
+{
+	typedef stdex::basic_string_view<CharT, Traits> inserter_type;
+
+	std::array<CharT, hasher<HashProvider>::digest_size * 2> buf;
+	detail::hexlify_to(h.digest(), buf.begin());
+
+	return out << inserter_type(buf.data(), buf.size());
 }
 
 typedef hasher<detail::md5_provider>	md5;
