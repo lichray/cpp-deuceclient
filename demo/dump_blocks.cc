@@ -52,12 +52,14 @@ void dump_blocks(char const* filename)
 #endif
 
 	deuceclient::managed_bundle<rabin_boundary> bs(10 * 1024 * 1024);
-	deuceclient::block_arrangement ba;
-
 	bs.boundary().set_limits(14843, 17432, 90406);
 
 	int64_t file_size = 0;
 	bool bundle_is_full;
+
+	std::cout.sync_with_stdio(false);
+	std::cout << '[';
+	bool first_item = true;
 
 	do
 	{
@@ -82,7 +84,16 @@ void dump_blocks(char const* filename)
 			deuceclient::sha1_digest blockid;
 			std::tie(end_of_block, blockid) = t;
 
-			ba.add(blockid, offset);
+			if (not first_item)
+				std::cout << ',';
+
+			first_item = false;
+			char buf[40];
+			hashlib::detail::hexlify_to(blockid, buf);
+			std::cout << "[\""
+			    << stdex::string_view(buf, sizeof(buf))
+			    << "\"," << offset << ']';
+
 			offset = file_size + end_of_block;
 		}
 
@@ -91,6 +102,5 @@ void dump_blocks(char const* filename)
 
 	} while (bundle_is_full);
 
-	std::cout.sync_with_stdio(false);
-	std::cout << ba.text() << std::endl;
+	std::cout << "]\n";
 }
