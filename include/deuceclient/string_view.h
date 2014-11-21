@@ -61,8 +61,6 @@ struct iter
 
 }
 
-using namespace std::placeholders;
-
 template <typename CharT, typename Traits = std::char_traits<CharT>>
 struct basic_string_view
 {
@@ -334,7 +332,7 @@ struct basic_string_view
 		    [=](CharT c)
 		    {
 			return std::none_of(s, s + n,
-			    std::bind(traits_eq(), c, _1));
+			    std::bind(traits_eq(), c, std::placeholders::_1));
 		    });
 
 		return offset_from_begin(it);
@@ -351,7 +349,7 @@ struct basic_string_view
 			return npos;
 
 		auto it = std::find_if_not(begin() + pos, end(),
-		    std::bind(traits_eq(), ch, _1));
+		    std::bind(traits_eq(), ch, std::placeholders::_1));
 
 		return offset_from_begin(it);
 	}
