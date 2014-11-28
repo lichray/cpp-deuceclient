@@ -37,7 +37,9 @@
 
 #if defined(_MSC_VER)
 #include <ciso646>
-#define NOMINMAX
+# ifndef NOMINMAX
+# define NOMINMAX
+# endif
 # if _MSC_VER < 1900
 # define noexcept throw()
 # define constexpr
