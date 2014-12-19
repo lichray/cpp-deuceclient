@@ -32,6 +32,8 @@ struct vault
 		client_(handle), vaultname_(std::move(name))
 	{}
 
+	std::string url() const;
+
 	void upload_block(sha1_digest blockid, stdex::string_view data);
 	void download_block(sha1_digest blockid, callback);
 	void delete_block(sha1_digest blockid);

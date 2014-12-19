@@ -21,6 +21,11 @@ namespace rax
 namespace deuceclient
 {
 
+std::string vault::url() const
+{
+	return client_.url_for_vault(vaultname_);
+}
+
 void vault::upload_block(sha1_digest blockid, stdex::string_view data)
 {
 	client_.upload_block(vaultname_, blockid, data);

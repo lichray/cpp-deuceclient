@@ -57,13 +57,13 @@ struct client
 	void finalize_file(stdex::string_view vaultname,
 	    stdex::string_view fileid, int64_t len);
 
-private:
 	std::string url_for_vault(stdex::string_view name) const;
 	std::string url_for_block(stdex::string_view vaultname,
 	    sha1_digest blockid) const;
 	std::string url_for_file(stdex::string_view vaultname,
 	    stdex::string_view fileid) const;
 
+private:
 	void do_download(std::string&& url, callback&&);
 	void do_delete(std::string&& url);
 	void do_authenticate();

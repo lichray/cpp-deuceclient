@@ -17,6 +17,7 @@ TEST_CASE("vault CRUD", "[deuce]")
 		auto v2 = client.get_vault("area11");
 
 		REQUIRE(v1 == v2);
+		REQUIRE(v1.url() == v2.url());
 	}
 
 	SECTION("delete")
@@ -60,6 +61,7 @@ TEST_CASE("file CRUD", "[deuce]")
 		auto f1 = vault.get_file(f.id());
 
 		REQUIRE(f1 == f);
+		REQUIRE(f1.url() == f.url());
 		REQUIRE_NOTHROW(vault.delete_file(f.id()));
 	}
 }

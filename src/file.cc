@@ -21,6 +21,11 @@ namespace rax
 namespace deuceclient
 {
 
+std::string file::url() const
+{
+	return client_.url_for_file(vaultname_, fileid_);
+}
+
 auto file::assign_blocks(block_arrangement& ba) -> std::vector<sha1_digest>
 {
 	return client_.assign_blocks(vaultname_, fileid_, ba);

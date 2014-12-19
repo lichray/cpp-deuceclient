@@ -37,6 +37,7 @@ struct file
 	{}
 
 	stdex::string_view id() const;
+	std::string url() const;
 
 	auto assign_blocks(block_arrangement& ba) -> std::vector<sha1_digest>;
 	void finalize_file(int64_t len);
