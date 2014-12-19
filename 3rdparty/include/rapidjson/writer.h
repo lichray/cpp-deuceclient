@@ -34,7 +34,7 @@ RAPIDJSON_DIAG_PUSH
 RAPIDJSON_DIAG_OFF(4127) // conditional expression is constant
 #endif
 
-namespace rapidjson {
+RAPIDJSON_NAMESPACE_BEGIN
 
 //! JSON writer
 /*! Writer implements the concept Handler.
@@ -59,12 +59,14 @@ public:
 
     //! Constructor
     /*! \param os Output stream.
-        \param allocator User supplied allocator. If it is null, it will create a private one.
+        \param stackAllocator User supplied allocator. If it is null, it will create a private one.
         \param levelDepth Initial capacity of stack.
     */
+    explicit
     Writer(OutputStream& os, StackAllocator* stackAllocator = 0, size_t levelDepth = kDefaultLevelDepth) : 
         os_(&os), level_stack_(stackAllocator, levelDepth * sizeof(Level)), hasRoot_(false) {}
 
+    explicit
     Writer(StackAllocator* allocator = 0, size_t levelDepth = kDefaultLevelDepth) :
         os_(0), level_stack_(allocator, levelDepth * sizeof(Level)), hasRoot_(false) {}
 
@@ -380,7 +382,7 @@ inline bool Writer<StringBuffer>::WriteDouble(double d) {
     return true;
 }
 
-} // namespace rapidjson
+RAPIDJSON_NAMESPACE_END
 
 #ifdef _MSC_VER
 RAPIDJSON_DIAG_POP

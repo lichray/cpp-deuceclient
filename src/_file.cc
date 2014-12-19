@@ -15,6 +15,7 @@
  */
 
 #include <httpverbs/httpverbs.h>
+#include <rapidjson/rapidjson.h>
 #include <rapidjson/internal/itoa.h>
 
 #include <deuceclient/client.h>

@@ -62,7 +62,11 @@ RAPIDJSON_DIAG_OFF(effc++)
 #include <iterator> // std::iterator, std::random_access_iterator_tag
 #endif
 
-namespace rapidjson {
+#if RAPIDJSON_HAS_CXX11_RVALUE_REFS
+#include <utility> // std::move
+#endif
+
+RAPIDJSON_NAMESPACE_BEGIN
 
 // Forward declaration.
 template <typename Encoding, typename Allocator>
@@ -1031,7 +1035,9 @@ public:
     //! Remove a member in object by its name.
     /*! \param name Name of member to be removed.
         \return Whether the member existed.
-        \note Removing member is implemented by moving the last member. So the ordering of members is changed.
+        \note This function may reorder the object members. Use \ref
+            EraseMember(ConstMemberIterator) if you need to preserve the
+            relative order of the remaining members.
         \note Linear time complexity.
     */
     bool RemoveMember(const Ch* name) {
@@ -1053,8 +1059,9 @@ public:
     //! Remove a member in object by iterator.
     /*! \param m member iterator (obtained by FindMember() or MemberBegin()).
         \return the new iterator after removal.
-        \note Removing member is implemented by moving the last member. So the ordering of members is changed.
-        \note Use \ref EraseMember(ConstMemberIterator) instead, if you need to rely on a stable member ordering.
+        \note This function may reorder the object members. Use \ref
+            EraseMember(ConstMemberIterator) if you need to preserve the
+            relative order of the remaining members.
         \note Constant time complexity.
     */
     MemberIterator RemoveMember(MemberIterator m) {
@@ -1081,7 +1088,8 @@ public:
         \pre IsObject() == true && \ref MemberBegin() <= \c pos < \ref MemberEnd()
         \return Iterator following the removed element.
             If the iterator \c pos refers to the last element, the \ref MemberEnd() iterator is returned.
-        \note Other than \ref RemoveMember(MemberIterator), this function preserves the ordering of the members.
+        \note This function preserves the relative order of the remaining object
+            members. If you do not need this, use the more efficient \ref RemoveMember(MemberIterator).
         \note Linear time complexity.
     */
     MemberIterator EraseMember(ConstMemberIterator pos) {
@@ -1093,7 +1101,8 @@ public:
         \param last  iterator following the last member to remove
         \pre IsObject() == true && \ref MemberBegin() <= \c first <= \c last <= \ref MemberEnd()
         \return Iterator following the last removed element.
-        \note Other than \ref RemoveMember(MemberIterator), this function preserves the ordering of the members.
+        \note This function preserves the relative order of the remaining object
+            members.
         \note Linear time complexity.
     */
     MemberIterator EraseMember(ConstMemberIterator first, ConstMemberIterator last) {
@@ -1625,12 +1634,51 @@ public:
         allocator_(allocator), ownAllocator_(0), stack_(stackAllocator, stackCapacity), parseResult_()
     {
         if (!allocator_)
-            ownAllocator_ = allocator_ = new Allocator();
+            ownAllocator_ = allocator_ = RAPIDJSON_NEW(Allocator());
     }
 
-    ~GenericDocument() {
-        delete ownAllocator_;
+#if RAPIDJSON_HAS_CXX11_RVALUE_REFS
+    //! Move constructor in C++11
+    GenericDocument(GenericDocument&& rhs) RAPIDJSON_NOEXCEPT
+        : ValueType(std::move(rhs)),
+          allocator_(rhs.allocator_),
+          ownAllocator_(rhs.ownAllocator_),
+          stack_(std::move(rhs.stack_)),
+          parseResult_(rhs.parseResult_)
+    {
+        rhs.allocator_ = 0;
+        rhs.ownAllocator_ = 0;
+        rhs.parseResult_ = ParseResult();
     }
+#endif
+
+    ~GenericDocument() {
+        Destroy();
+    }
+
+#if RAPIDJSON_HAS_CXX11_RVALUE_REFS
+    //! Move assignment in C++11
+    GenericDocument& operator=(GenericDocument&& rhs) RAPIDJSON_NOEXCEPT
+    {
+        // The cast to ValueType is necessary here, because otherwise it would
+        // attempt to call GenericValue's templated assignment operator.
+        ValueType::operator=(std::forward<ValueType>(rhs));
+
+        // Calling the destructor here would prematurely call stack_'s destructor
+        Destroy();
+
+        allocator_ = rhs.allocator_;
+        ownAllocator_ = rhs.ownAllocator_;
+        stack_ = std::move(rhs.stack_);
+        parseResult_ = rhs.parseResult_;
+
+        rhs.allocator_ = 0;
+        rhs.ownAllocator_ = 0;
+        rhs.parseResult_ = ParseResult();
+
+        return *this;
+    }
+#endif
 
     //!@name Parse from stream
     //!@{
@@ -1814,6 +1862,8 @@ private:
     }
 
 private:
+    //! Prohibit copying
+    GenericDocument(const GenericDocument&);
     //! Prohibit assignment
     GenericDocument& operator=(const GenericDocument&);
 
@@ -1824,6 +1874,10 @@ private:
         else
             stack_.Clear();
         stack_.ShrinkToFit();
+    }
+
+    void Destroy() {
+        RAPIDJSON_DELETE(ownAllocator_);
     }
 
     static const size_t kDefaultStackCapacity = 1024;
@@ -1842,12 +1896,29 @@ template <typename SourceAllocator>
 inline
 GenericValue<Encoding,Allocator>::GenericValue(const GenericValue<Encoding,SourceAllocator>& rhs, Allocator& allocator)
 {
-    GenericDocument<Encoding,Allocator> d(&allocator);
-    rhs.Accept(d);
-    RawAssign(*d.stack_.template Pop<GenericValue>(1));
+    switch (rhs.GetType()) {
+    case kObjectType:
+    case kArrayType: { // perform deep copy via SAX Handler
+            GenericDocument<Encoding,Allocator> d(&allocator);
+            rhs.Accept(d);
+            RawAssign(*d.stack_.template Pop<GenericValue>(1));
+        }
+        break;
+    case kStringType:
+        if (rhs.flags_ == kConstStringFlag) {
+            flags_ = rhs.flags_;
+            data_  = *reinterpret_cast<const Data*>(&rhs.data_);
+        } else {
+            SetStringRaw(StringRef(rhs.GetString(), rhs.GetStringLength()), allocator);
+        }
+        break;
+    default: // kNumberType, kTrueType, kFalseType, kNullType
+        flags_ = rhs.flags_;
+        data_  = *reinterpret_cast<const Data*>(&rhs.data_);
+    }
 }
 
-} // namespace rapidjson
+RAPIDJSON_NAMESPACE_END
 
 #if defined(_MSC_VER) || defined(__GNUC__)
 RAPIDJSON_DIAG_POP
