@@ -109,10 +109,10 @@ struct managed_bundle : bundle
 	{}
 
 	template <typename Reader>
-	bool consume(Reader reader)
+	bool consume(Reader&& f)
 	{
 		std::error_code ec;
-		auto is_full = consume(std::move(reader), ec);
+		auto is_full = consume(std::forward<Reader>(f), ec);
 
 		if (ec)
 #if !(defined(_MSC_VER) && _MSC_VER < 1700)
@@ -125,7 +125,7 @@ struct managed_bundle : bundle
 	}
 
 	template <typename Reader>
-	bool consume(Reader reader, std::error_code& ec)
+	bool consume(Reader&& f, std::error_code& ec)
 	{
 		if (needs_reset_)
 		{
@@ -143,7 +143,7 @@ struct managed_bundle : bundle
 		BOOST_ASSERT_MSG(not buffer_is_full(),
 		    "buffer size overflow");
 
-		auto len = reader(epptr_, unused_blen());
+		auto len = std::forward<Reader>(f)(epptr_, unused_blen());
 
 		if (len < 0)
 		{
