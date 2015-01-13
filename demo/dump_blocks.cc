@@ -1,5 +1,3 @@
-#include <boost/foreach.hpp>
-
 #include <fcntl.h>
 #if defined(WIN32)
 #include <sys/stat.h>
@@ -73,12 +71,16 @@ void dump_blocks(char const* filename)
 #endif
 		    });
 
-		if (bs.size() == 0)
+		if (bs.empty())
 			break;
 
 		int64_t offset = file_size;
 
-		BOOST_FOREACH(auto&& t, bs.blocks())
+#if !(defined(_MSC_VER) && _MSC_VER < 1800)
+		for (auto&& t : bs.blocks())
+#else
+		for each (auto&& t in bs.blocks())
+#endif
 		{
 			size_t end_of_block;
 			deuceclient::sha1_digest blockid;

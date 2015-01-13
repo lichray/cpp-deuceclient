@@ -5,8 +5,6 @@
 #include <deuceclient/deuceclient.h>
 #include <httpverbs/stream.h>
 
-#include <boost/foreach.hpp>
-
 using namespace rax;
 using namespace httpverbs::keywords;
 
@@ -36,7 +34,11 @@ TEST_CASE("split random data with rabin boundary", "[deuce]")
 
 		int64_t offset = file_size;
 
-		BOOST_FOREACH(auto&& t, bs.blocks())
+#if !(defined(_MSC_VER) && _MSC_VER < 1800)
+		for (auto&& t : bs.blocks())
+#else
+		for each (auto&& t in bs.blocks())
+#endif
 		{
 			size_t end_of_block;
 			deuceclient::sha1_digest blockid;

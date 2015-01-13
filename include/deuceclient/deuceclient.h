@@ -19,5 +19,6 @@
 
 #include "client.h"
 #include "rabin_boundary.h"
+#include "file_uploader.h"
 
 #endif
