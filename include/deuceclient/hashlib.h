@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Rackspace, Inc.
+ * Copyright 2014, 2015 Rackspace, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ struct sha1_provider
 	}
 
 	static
-	void finalize(unsigned char* md, context_type* ctx)
+	void final(unsigned char* md, context_type* ctx)
 	{
 		SHA1_Final(md, ctx);
 	}
@@ -79,7 +79,7 @@ struct sha256_provider
 	}
 
 	static
-	void finalize(unsigned char* md, context_type* ctx)
+	void final(unsigned char* md, context_type* ctx)
 	{
 		SHA256_Final(md, ctx);
 	}
@@ -104,7 +104,7 @@ struct sha512_provider
 	}
 
 	static
-	void finalize(unsigned char* md, context_type* ctx)
+	void final(unsigned char* md, context_type* ctx)
 	{
 		SHA512_Final(md, ctx);
 	}
@@ -129,7 +129,7 @@ struct md5_provider
 	}
 
 	static
-	void finalize(unsigned char* md, context_type* ctx)
+	void final(unsigned char* md, context_type* ctx)
 	{
 		MD5_Final(md, ctx);
 	}
@@ -273,7 +273,7 @@ struct hasher
 		digest_type md;
 		auto tmp_ctx = ctx_;
 
-		HashProvider::finalize(md.data(), &tmp_ctx);
+		HashProvider::final(md.data(), &tmp_ctx);
 
 		return md;
 	}
